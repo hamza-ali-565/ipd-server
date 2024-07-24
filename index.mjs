@@ -4,10 +4,6 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import * as dotenv from "dotenv";
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import bodyParser from "body-parser";
-
 import Authentication from "./Routes/Authentications/Auth.mjs";
 import Auth from "./Routes/Authentications/Auth.mjs";
 import Prod from "./API/Product/Product.mjs";
