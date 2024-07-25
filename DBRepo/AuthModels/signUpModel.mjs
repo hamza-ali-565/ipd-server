@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken"
 
 const hospitalUser = new mongoose.Schema({
   userId: { type: String, required: true },
@@ -18,24 +19,22 @@ hospitalUser.pre("save", async function (next) {
 });
 
 // passwordcheck
-// userSchema.methods.isPasswordCorrect = async function(password){
-//   return await bcrypt.compare(password, this.password)
-// }
+hospitalUser.methods.isPasswordCorrect = async function(password){
+  return await bcrypt.compare(password, this.password)
+}
 
-// userSchema.methods.generateAccessToken = function(){
-//   return jwt.sign(
-//       {
-//           _id: this._id,
-//           email: this.email,
-//           username: this.username,
-//           fullName: this.fullName
-//       },
-//       process.env.ACCESS_TOKEN_SECRET,
-//       {
-//           expiresIn: process.env.ACCESS_TOKEN_EXPIRY
-//       }
-//   )
-// }
+hospitalUser.methods.generateAccessToken = function(){
+  return jwt.sign(
+      {
+          _id: this._id,
+         userId: this.userId
+      },
+      process.env.ACCESS_TOKEN_SECRET,
+      {
+          expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+      }
+  )
+}
 
 // userSchema.methods.generateRefreshToken = function(){
 //   return jwt.sign(

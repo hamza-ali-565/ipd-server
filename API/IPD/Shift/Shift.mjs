@@ -4,7 +4,6 @@ import moment from "moment-timezone";
 import jwt from "jsonwebtoken";
 
 const router = express.Router();
-const SECRET = process.env.SECRET || "topsecret";
 router.post("/shift", async (req, res) => {
   try {
     const { userName, userId } = req.body;
@@ -52,9 +51,9 @@ router.put("/shift", async (req, res) => {
 router.get("/shift", async (req, res) => {
   try {
     const token = req.cookies.Token;
-    const decoded = jwt.verify(token, SECRET);
+    const decoded =  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     const userId = decoded.userId;
-    console.log("User iD:", userId);
+    console.log("User iD:", decoded.userId);
     const response = await ShiftModel.find({ userId, status: true });
     res.status(200).send({ data: response });
   } catch (error) {
