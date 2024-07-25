@@ -22,12 +22,13 @@ import Auth from "../Routes/Authentications/Auth.mjs";
 import Prod from "../API/Product/Product.mjs";
 import MainData from "../Routes/MainRoute/MainRoute.mjs";
 import LabRoutes from "./routes/LAB/test.routes.mjs";
+import { verifyJWT } from "./middlewares/auth.middleware.mjs";
 
 // my routes
 app.use("/api/v1", Authentication);
 app.use("/api/v1", Auth);
 app.use("/api/v1", Prod);
-app.use("/api/v1", MainData);
+app.use("/api/v1",verifyJWT, MainData);
 app.use("/api/v1/lab", LabRoutes);
 
 export { app };

@@ -3,14 +3,21 @@ import express from "express";
 const router = express.Router();
 
 router.post("/logout", (req, res) => {
-  res.cookie("Token", "", {
-    maxAge: 1,
-    httpOnly: true,
-    sameSite: "none",
-    secure: true,
-  });
-
-  res.send({ message: "Logout successfull" });
+  try {
+    const options = {
+      httpOnly: true,
+      secure: true
+  }
+  return res
+  .status(200)
+  .clearCookie("Token", options)
+  .send({message: "Logout successfull"})
+  } catch (error) {
+    res.status(400).send({message: error.message})
+    console.log("Error" , error);
+  }
 });
 
 export default router;
+
+
