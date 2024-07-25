@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 const hospitalUser = new mongoose.Schema({
   userId: { type: String, required: true },
@@ -8,14 +9,13 @@ const hospitalUser = new mongoose.Schema({
   createdOn: { type: String, required: true },
 });
 
-
 // encrypt password
-// userSchema.pre("save", async function (next) {
-//   if(!this.isModified("password")) return next();
+hospitalUser.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
 
-//   this.password = await bcrypt.hash(this.password, 10)
-//   next()
-// })
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
 
 // passwordcheck
 // userSchema.methods.isPasswordCorrect = async function(password){
@@ -41,7 +41,7 @@ const hospitalUser = new mongoose.Schema({
 //   return jwt.sign(
 //       {
 //           _id: this._id,
-          
+
 //       },
 //       process.env.REFRESH_TOKEN_SECRET,
 //       {
@@ -49,6 +49,5 @@ const hospitalUser = new mongoose.Schema({
 //       }
 //   )
 // }
-
 
 export const hospitalUserModel = mongoose.model("Hospital User", hospitalUser);

@@ -1,5 +1,4 @@
 import express from "express";
-import bcrypt from "bcrypt";
 import { hospitalUserModel } from "../../DBRepo/AuthModels/signUpModel.mjs";
 import moment from "moment";
 
@@ -13,14 +12,11 @@ router.post("/signup", async (req, res) => {
     const duplicateCheck = await hospitalUserModel.find({ userId });
     if (duplicateCheck.length > 0)
       throw new Error("THIS USER ID ALREADY EXIST ");
-    let saltRound = 10;
-    const salt = await bcrypt.genSalt(saltRound);
-    let hashedPass = await bcrypt.hash(password, salt);
 
     const createUser = await hospitalUserModel.create({
       userId: userId.toLowerCase(),
       userName,
-      password: hashedPass,
+      password,
       createdOn: `${moment(Date.now()).format("DD/MM/YYYY HH:mm:ss")}`,
     });
 
