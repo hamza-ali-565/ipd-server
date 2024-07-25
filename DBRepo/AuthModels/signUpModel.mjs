@@ -36,6 +36,7 @@ const hospitalUser = new mongoose.Schema({
 //       }
 //   )
 // }
+
 // userSchema.methods.generateRefreshToken = function(){
 //   return jwt.sign(
 //       {
