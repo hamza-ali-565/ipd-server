@@ -7,15 +7,14 @@ const router = express.Router();
 
 router.post("/ipdwardcharges", async (req, res) => {
   try {
-    const { party, wardName, bedDetails, updateUser, _id } = req.body;
-    console.log("req.body", req.body);
+    const { party, wardName, bedDetails, updateUser} = req.body;
+    console.log("req user from middle ware", req.user);
     if (![party, wardName, updateUser, bedDetails].every(Boolean))
       throw new Error("ALL PARAMETERS ARE REQUIRED!!");
-    console.log("id length", _id);
-
-    if (_id !== "") {
+const alreadyUpdated = await IPDWardChargesModel.find({party, wardName})
+    if (alreadyUpdated.length>0) {
       const updateIPD = await IPDWardChargesModel.findOneAndUpdate(
-        { _id: _id },
+        { party, wardName},
         {
           $set: {
             party,
@@ -27,7 +26,7 @@ router.post("/ipdwardcharges", async (req, res) => {
         },
         { new: true }
       );
-      console.log("updateIPD", updateIPD);
+      
       if (!updateIPD) {
         throw new Error("ERROR WHILE FINDIND WARD!!");
       } else if (updateIPD) {
