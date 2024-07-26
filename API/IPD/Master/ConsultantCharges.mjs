@@ -117,7 +117,7 @@ router.get("/admissionconsultant", async (req, res) => {
     );
     if (findBed.length <= 0)
       throw new Error(
-        "RATES OF BEDS ARE NOT ACTIVATED KINDLY CONTACT TO YOUR I.T DEPARTMENT!!!"
+        "RATES OF CONSULTANT IS NOT ACTIVATED KINDLY CONTACT TO YOUR I.T DEPARTMENT OR TYPE MANUALLY !!!"
       );
     const consultantCharges = findBed[0].consultantDetails.filter(
       (item) => item.consultantId.toString() == consultantId.toString()
