@@ -2,6 +2,7 @@ import express from "express";
 import { serviceChargesModel } from "../../../DBRepo/IPD/Masters/IPDServiceChargesModel.mjs";
 import moment from "moment";
 import { serviceNameModel } from "../../../DBRepo/General/Service/ServiceModel.mjs";
+import { DSChargesModel } from "../../../DBRepo/IPD/Masters/DSChargesModel.mjs";
 
 const router = express.Router();
 
@@ -117,4 +118,41 @@ router.get("/servicecharges", async (req, res) => {
   }
 });
 
+router.put("/updateservicename", async (req, res) => {
+  try {
+    const { serviceName, serviceId } = req.body;
+    const updatedServiceName = await serviceNameModel.updateOne(
+      { _id: serviceId },
+      { serviceName, updatedUser: req.user?.userId },
+      { new: true }
+    );
+    const response = await serviceChargesModel.updateMany(
+      { "serviceDetails.serviceId": serviceId },
+      {
+        $set: {
+          "serviceDetails.$[elem].serviceName": serviceName,
+        },
+      },
+      {
+        arrayFilters: [{ "elem.serviceId": serviceId }],
+      }
+    );
+    const response2 = await DSChargesModel.updateMany(
+      { "serviceDetails.serviceId": serviceId },
+      {
+        $set: {
+          "serviceDetails.$[elem].serviceName": serviceName,
+        },
+      },
+      {
+        arrayFilters: [{ "elem.serviceId": serviceId }],
+      }
+    );
+    console.log("many of response", response);
+    res.status(200).send({ data: updatedServiceName });
+  } catch (error) {
+    res.status(400).send({ message: "update failed..", data: error });
+    console.log("error", error);
+  }
+});
 export default router;

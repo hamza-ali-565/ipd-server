@@ -1,26 +1,23 @@
 import express from "express";
 import { hospitalUserModel } from "../../DBRepo/AuthModels/signUpModel.mjs";
 import bcrypt from "bcrypt";
-import {ApiError} from '../../src/utils/ApiError.mjs'
+import { ApiError } from "../../src/utils/ApiError.mjs";
 import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
 const SECRET = process.env.SECRET || "topsecret";
 
-const generateAccessTokens = async(userId) =>{
+const generateAccessTokens = async (userId) => {
   try {
-      const user = await hospitalUserModel.findById({_id: userId})
-      const accessToken = user.generateAccessToken()
-      
+    const user = await hospitalUserModel.findById({ _id: userId });
+    const accessToken = user.generateAccessToken();
 
-      return {accessToken}
-
-
+    return { accessToken };
   } catch (error) {
-      throw new ApiError(500, "Something went wrong while access token")
+    throw new ApiError(500, "Something went wrong while access token");
   }
-}
+};
 
 router.post("/login", async (req, res) => {
   try {
@@ -29,35 +26,34 @@ router.post("/login", async (req, res) => {
     let myId = userId.toLowerCase();
     const userCheck = await hospitalUserModel.findOne({ userId: myId });
     if (userCheck.length === 0) throw new Error("USER DOES NOT EXIST!!");
-    const isPasswordValid = await userCheck.isPasswordCorrect(password)
+    const isPasswordValid = await userCheck.isPasswordCorrect(password);
     if (!isPasswordValid) {
-      throw new ApiError(401, "Invalid user credentials")
-      }
-    
- const {accessToken} = await generateAccessTokens(userCheck._id)
+      throw new ApiError(401, "Invalid user credentials");
+    }
 
- const options = {
-     httpOnly: true,
-     secure: true
- }
+    const { accessToken } = await generateAccessTokens(userCheck._id);
+
+    const options = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    };
     res
-  .status(200)
-  .cookie("Token", accessToken, options)
-  .send({
-    data: {
-      userName: userCheck.userName,
-      userId: userCheck.userId,
-      token: accessToken,
-    },
-  })
+      .status(200)
+      .cookie("Token", accessToken, options)
+      .send({
+        data: {
+          userName: userCheck.userName,
+          userId: userCheck.userId,
+          token: accessToken,
+        },
+      });
   } catch (error) {
     res.status(400).send({ message: error.message });
   }
 });
 
-
 // const loginUser = asyncHandler(async (req, res) =>{
- 
 
 //   const {email, username, password} = req.body
 //   console.log(email);
@@ -65,11 +61,11 @@ router.post("/login", async (req, res) => {
 //   if (!username && !email) {
 //       throw new ApiError(400, "username or email is required")
 //   }
-  
+
 //   // Here is an alternative of above code based on logic discussed in video:
 //   // if (!(username || email)) {
 //   //     throw new ApiError(400, "username or email is required")
-      
+
 //   // }
 
 //   const user = await User.findOne({
@@ -101,7 +97,7 @@ router.post("/login", async (req, res) => {
 //   .cookie("refreshToken", refreshToken, options)
 //   .json(
 //       new ApiResponse(
-//           200, 
+//           200,
 //           {
 //               user: loggedInUser, accessToken, refreshToken
 //           },

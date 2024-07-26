@@ -27,8 +27,8 @@ import { verifyJWT } from "./middlewares/auth.middleware.mjs";
 // my routes
 app.use("/api/v1", Authentication);
 app.use("/api/v1", Auth);
-app.use("/api/v1", Prod);
-app.use("/api/v1",verifyJWT, MainData);
+app.use("/api/v1", verifyJWT, Prod);
+app.use("/api/v1", verifyJWT, MainData);
 app.use("/api/v1/lab", LabRoutes);
 
 export { app };
