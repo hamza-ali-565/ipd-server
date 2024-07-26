@@ -62,18 +62,18 @@ router.get("/runningbill", async (req, res) => {
       const radioFlat = radioChargesData.flatMap((item) => item.serviceDetails);
 
       // Filter out the items that are not deleted
-      const radiologyCharges = radioFlat.filter(
+      updatedRadiologyCharges = radioFlat.filter(
         (items) => items.isDeleted !== true
       );
 
       // Add the date to each item in radiologyCharges
-      updatedRadiologyCharges = radiologyCharges.map((item) => ({
-        amount: item?.amount,
-        date: date,
-        createdUser: item?.createdUser,
-        serviceName: item?.serviceName,
-        consultant: item?.consultant,
-      }));
+    //   updatedRadiologyCharges = radiologyCharges.map((item) => ({
+    //     amount: item?.amount,
+    //     date: date,
+    //     createdUser: item?.createdUser,
+    //     serviceName: item?.serviceName,
+    //     consultant: item?.consultant,
+    //   }));
     }
 
     // consultant Visit

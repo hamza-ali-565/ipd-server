@@ -6,6 +6,7 @@ import moment from "moment-timezone";
 import { resetCounter } from "../../General/ResetCounter/ResetCounter.mjs";
 import { AdmissionModel } from "../../../DBRepo/IPD/PatientModel/AdmissionDetails/AdmissionModel.mjs";
 import { PaymentRefundModal } from "../../../DBRepo/IPD/PaymenModels/PaymentRefundModel.mjs";
+import {getCreatedOn} from '../../../src/constants.mjs'
 
 const router = express.Router();
 
@@ -390,10 +391,23 @@ router.post("/ipdradiology", async (req, res) => {
     if (![admissionNo, mrNo, serviceDetails].every(Boolean))
       throw new Error("ALL PARAMETERS ARE REQUIRED!!!");
     if (serviceDetails.length <= 0) throw new Error("SERVICES ARE MISSING !!!");
+    const dateWiseService = serviceDetails?.map((items)=>({
+      serviceName: items?.serviceName,
+      charges: items?.charges,
+      status: items?.status,
+      serviceId: items?.serviceId,
+      _id: items?._id,
+      amount: items?.amount,
+      quantity: items?.quantity,
+      createdUser: items?.createdUser,
+      consultant: items?.consultant,
+      createdOn: getCreatedOn()
+    }))
+    console.log("service Details", dateWiseService);
     const response = await RadiologyBookingModel.create({
       admissionNo,
       mrNo,
-      serviceDetails,
+      serviceDetails: dateWiseService,
       createdOn: moment(new Date())
         .tz("Asia/Karachi")
         .format("DD/MM/YYYY HH:mm:ss"),
