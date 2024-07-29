@@ -15,6 +15,7 @@ import {
 
 import { ConsultantsModel } from "../../../DBRepo/General/ConsultantModel/ConsultantModel.mjs";
 import moment from "moment-timezone";
+import { RadiologyBookingModel } from "../../../DBRepo/Radiology/Transaction/RadiologyBookingModel.mjs";
 const router = express.Router();
 
 router.post("/finalbill", async (req, res) => {
@@ -166,6 +167,21 @@ router.get("/finalbill", async (req, res) => {
       (items) => items.isdeleted !== true
     );
 
+    const radioChargesData = await RadiologyBookingModel.find({
+      admissionNo,
+    });
+    let updatedRadiologyCharges;
+    if (radioChargesData.length > 0) {
+      const date = radioChargesData[0].createdOn;
+
+      // Flatten the serviceDetails into radioFlat
+      const radioFlat = radioChargesData.flatMap((item) => item.serviceDetails);
+
+      // Filter out the items that are not deleted
+      updatedRadiologyCharges = radioFlat.filter(
+        (items) => items.isDeleted !== true
+      );
+    }
     // consultant Visit
     const consultantVisit = await ConsultantVisitModel.find({
       admissionNo,
@@ -225,6 +241,7 @@ router.get("/finalbill", async (req, res) => {
         activeWard,
         ConsultantName,
         serviceCharges,
+        radiologyCharges: updatedRadiologyCharges,
         consultantVisit,
         procedureCharges,
         wardCharges,

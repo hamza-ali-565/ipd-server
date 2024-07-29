@@ -52,7 +52,7 @@ router.post("/readmission", async (req, res) => {
     let party = partyName[0]?.party;
 
     const findActiveBeds = await IPDWardChargesModel.find({ wardName, party });
-    if (findActiveBeds.length < 0)
+    if (findActiveBeds.length <= 0)
       throw new Error(
         "THIS WARD IS NOT ACTIVE ON THIS PARTY KINDLY CONTACT TO YOUR IT TEAM !!!"
       );
@@ -135,6 +135,7 @@ router.post("/readmission", async (req, res) => {
     res.status(200).send({ message: response });
   } catch (error) {
     res.status(400).send({ message: error.message });
+    console.log("eeroor", error);
   }
 });
 

@@ -6,7 +6,7 @@ import moment from "moment-timezone";
 import { resetCounter } from "../../General/ResetCounter/ResetCounter.mjs";
 import { AdmissionModel } from "../../../DBRepo/IPD/PatientModel/AdmissionDetails/AdmissionModel.mjs";
 import { PaymentRefundModal } from "../../../DBRepo/IPD/PaymenModels/PaymentRefundModel.mjs";
-import {getCreatedOn} from '../../../src/constants.mjs'
+import { getCreatedOn } from "../../../src/constants.mjs";
 
 const router = express.Router();
 
@@ -122,6 +122,22 @@ router.get("/radiologybooking", async (req, res) => {
     res.status(400).send({ message: error.message });
   }
 });
+router.get("/radiologybookingNew", async (req, res) => {
+  try {
+    const { admissionNo } = req.query;
+    if (![admissionNo].every(Boolean))
+      throw new Error("ALL PARAMETERS ARE REQUIRED !!!");
+    const response = await RadiologyBookingModel.find({ admissionNo });
+
+    if (response.length <= 0)
+      throw new Error("NO SERVICES ADDED TO THIS PATIENT!!!");
+    const flatData = response.flatMap((item) => item?.serviceDetails);
+    const updatedData = flatData.filter((items) => items?.isDeleted !== true);
+    res.status(200).send({ data: updatedData });
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
 
 router.get("/radiologyreverse", async (req, res) => {
   try {
@@ -187,6 +203,7 @@ router.get("/radiologydetails", async (req, res) => {
       isDeletedAll: false,
       patientType,
     });
+    if (response.length < 0) throw new Error("NO DATA FOUND !!!");
     const mrNos = response.map((item) => item.mrNo);
     const patientDetails = await PatientRegModel.find({ MrNo: { $in: mrNos } });
     const mrNoToPatientNameMap = patientDetails.reduce((acc, patient) => {
@@ -391,7 +408,7 @@ router.post("/ipdradiology", async (req, res) => {
     if (![admissionNo, mrNo, serviceDetails].every(Boolean))
       throw new Error("ALL PARAMETERS ARE REQUIRED!!!");
     if (serviceDetails.length <= 0) throw new Error("SERVICES ARE MISSING !!!");
-    const dateWiseService = serviceDetails?.map((items)=>({
+    const dateWiseService = serviceDetails?.map((items) => ({
       serviceName: items?.serviceName,
       charges: items?.charges,
       status: items?.status,
@@ -401,8 +418,8 @@ router.post("/ipdradiology", async (req, res) => {
       quantity: items?.quantity,
       createdUser: items?.createdUser,
       consultant: items?.consultant,
-      createdOn: getCreatedOn()
-    }))
+      createdOn: getCreatedOn(),
+    }));
     console.log("service Details", dateWiseService);
     const response = await RadiologyBookingModel.create({
       admissionNo,

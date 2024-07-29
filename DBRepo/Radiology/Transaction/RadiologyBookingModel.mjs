@@ -30,7 +30,7 @@ const radiologyBooking = new mongoose.Schema({
       refundOn: { type: String },
       refundUser: { type: String },
       createdUser: { type: String },
-      createdOn: {type: String},
+      createdOn: { type: String },
       deletedUser: { type: String },
       deletedOn: { type: String },
     },

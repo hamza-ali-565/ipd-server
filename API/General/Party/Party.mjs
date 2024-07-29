@@ -4,6 +4,7 @@ import {
   PartyModel,
 } from "../../../DBRepo/General/PartyModel.mjs/Party.Model.mjs";
 import { getCreatedOn } from "../../../src/constants.mjs";
+import { AdmissionPartyModel } from "../../../DBRepo/IPD/PatientModel/AdmissionDetails/PartyModel.mjs";
 
 const router = express.Router();
 
@@ -30,8 +31,13 @@ router.post("/partyname", async (req, res) => {
     const { name, parent, createdUser } = req.body;
     if (![name, parent, createdUser].every(Boolean))
       throw new Error("ALL PARAMETERS ARE REQUIRED !!!");
+    const trimmedName = name.trim();
+    const DupCheck = await PartyModel.find({ name: trimmedName });
+    if (DupCheck.length > 0) {
+      throw new Error("Party Name Already Exist !!!");
+    }
     const response = await PartyModel.create({
-      name: name,
+      name: trimmedName,
       parent,
       createdUser,
       createdOn: getCreatedOn(),
@@ -67,6 +73,28 @@ router.get("/partyall", async (req, res) => {
   try {
     const response = await PartyModel.find({}, "name");
     res.status(200).send({ data: response });
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+
+router.put("/partyname", async (req, res) => {
+  try {
+    const { name, partyId } = req?.body;
+
+    if (!name) throw new Error("UPDATED NAME IS REQUIRED !!!");
+    const trimmedName = name.trim();
+    const updateMainDoc = await PartyModel.updateOne(
+      { _id: partyId },
+      { $set: { name: trimmedName } },
+      { new: true }
+    );
+    // const response = await AdmissionPartyModel.updateMany(
+    //   { party: trimmedName },
+    //   { $set: { party: trimmedName } }
+    // );
+    // console.log("RESPONSE", response);
+    res.status(200).send({ data: updateMainDoc });
   } catch (error) {
     res.status(400).send({ message: error.message });
   }
