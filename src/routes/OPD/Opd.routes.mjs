@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { OpdConsCharges } from "../../controllers/OPD/ConsCharges.controller.mjs";
+import { FindDrCharges, OpdConsCharges } from "../../controllers/OPD/ConsCharges.controller.mjs";
 
 const router = Router()
 
 router.route('/opdConsCharges').post(OpdConsCharges)
+router.route('/findDrCharges').get(FindDrCharges)
 
 export default router

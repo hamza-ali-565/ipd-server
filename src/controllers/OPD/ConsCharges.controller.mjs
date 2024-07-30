@@ -11,8 +11,32 @@ const OpdConsCharges = asyncHandler(async (req, res) => {
   if (![consultantName, consultantId, party, partyId, amount].every(Boolean))
     throw new ApiError(
       400,
-      "ALL PARAMETERS ARE REQUIRED /n EXAMPLE PARAMETERS ARE [ consultantName, consultantId, party, partyId, amount ]"
+      "ALL PARAMETERS ARE REQUIRED EXAMPLE PARAMETERS ARE [ consultantName, consultantId, party, partyId, amount ]"
     );
+
+  const docCheck = await ConsChargesModel.findOneAndUpdate(
+    { partyId, consultantId },
+    {
+      $set: {
+        amount,
+        updatedUser: req.user?.userId,
+        updatedOn: getCreatedOn()
+      },
+    },
+    { new: true }
+  );
+  console.log("DOC ", docCheck);
+  if (docCheck) {
+    return res
+      .status(201)
+      .json(
+        new ApiResponse(
+          201,
+          { data: docCheck },
+          `Charges of consultant ${consultantName} Updated on ${party}`
+        )
+      );
+  }
 
   const response = await ConsChargesModel.create({
     consultantName,
@@ -36,4 +60,14 @@ const OpdConsCharges = asyncHandler(async (req, res) => {
     );
 });
 
-export { OpdConsCharges };
+const FindDrCharges = asyncHandler(async (req, res) => {
+  const { consultantId } = req.query;
+  if (!consultantId) throw new ApiError(400, "CONSULTANT ID IS REQUIRED !!!");
+  const response = await ConsChargesModel.find({ consultantId });
+  if (response) {
+    return res.status(200).json(new ApiResponse(200, { data: response }));
+  }
+  throw new ApiError(400, "DATA NOT FOUND !!!");
+});
+
+export { OpdConsCharges , FindDrCharges};

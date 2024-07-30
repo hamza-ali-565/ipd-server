@@ -9,7 +9,7 @@ const OPDConsultantCharges = new Schema({
   createdUser: { type: String, required: true },
   createdOn: { type: String, required: true },
   updatedUser: { type: String },
-  undatedOn: { type: String },
+  updatedOn: { type: String },
 });
 
 
