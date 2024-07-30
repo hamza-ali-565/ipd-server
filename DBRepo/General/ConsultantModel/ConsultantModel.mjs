@@ -11,6 +11,8 @@ const consultant = new Schema({
   cnic: { type: String, required: true },
   phone: { type: String },
   status: { type: Boolean, default: false },
+  days: {type: String, required: true},
+  timing: {type: String, required: true},
   createdUser: { type: String, required: true },
   createdOn: { type: String },
   updatedUser: { type: String },

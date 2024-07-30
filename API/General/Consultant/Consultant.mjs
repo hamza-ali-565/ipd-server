@@ -20,11 +20,18 @@ router.post("/adddoctor", async (req, res) => {
       email,
       cnic,
       phone,
+      days,
+      timing,
       status,
       createdUser,
       _id,
     } = req.body;
-    if (![name, speciality, specialityId, cnic, createdUser].every(Boolean))
+    console.log("req body", req?.body);
+    if (
+      ![name, speciality, specialityId, cnic, days, timing, createdUser].every(
+        Boolean
+      )
+    )
       throw new Error("fields like Code, Name, Speciality, Cnic are Mendotary");
     if (_id !== "") {
       const updateConsultant = await ConsultantsModel.findOneAndUpdate(
@@ -40,6 +47,8 @@ router.post("/adddoctor", async (req, res) => {
             specialityId,
             phone,
             status,
+            days,
+            timing,
             updatedUser: createdUser,
             updatedOn: getCreatedOn(),
           },
@@ -59,6 +68,8 @@ router.post("/adddoctor", async (req, res) => {
       cnic,
       phone,
       status,
+      days,
+      timing,
       createdUser: createdUser,
       createdOn: getCreatedOn(),
     });
