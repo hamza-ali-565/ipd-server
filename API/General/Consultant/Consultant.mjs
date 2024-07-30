@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import express from "express";
-import { ConsultantsModel } from "../../../DBRepo/General/ConsultantModel/ConsultantModel.mjs";
+import {
+  ConsultantsModel,
+  SpecialityModel,
+} from "../../../DBRepo/General/ConsultantModel/ConsultantModel.mjs";
 import moment from "moment";
 import { getCreatedOn } from "../../../src/constants.mjs";
 
@@ -91,6 +94,21 @@ router.get("/vectorconsultant", async (req, res) => {
     res.status(200).send({ data: response });
   } catch (error) {
     res.status(400).send({ message: `${error.message}` });
+  }
+});
+
+router.post("/specialty", async (req, res) => {
+  try {
+    const { speciality } = req.body;
+    if (!speciality) throw new Error("SPECIALITY IS REQUIRED !!!");
+    const response = await SpecialityModel.create({
+      speciality,
+      createdUser: req?.user?.userId,
+      createdOn: getCreatedOn()
+    });
+    res.status(200).send({data: response})
+  } catch (error) {
+    res.status(400).send({ message: error?.message });
   }
 });
 

@@ -1,6 +1,7 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
+import { getCreatedOn } from "../../../src/constants.mjs";
 
-const consultant = new mongoose.Schema({
+const consultant = new Schema({
   name: { type: String, required: true },
   speciality: { type: String, required: true },
   pmdc: { type: String },
@@ -14,4 +15,13 @@ const consultant = new mongoose.Schema({
   updatedUser: { type: String },
   updatedOn: { type: String },
 });
+
 export const ConsultantsModel = mongoose.model("Consultant New", consultant);
+
+const speciality = new Schema({
+  speciality: { type: String, required: true },
+  createdUser: { type: String, required: true },
+  createdOn: { type: String, required: true},
+});
+
+export const SpecialityModel = mongoose.model("Speciality", speciality);
