@@ -4,7 +4,8 @@ import { OPDRegModel } from "../../models/OPD.Models/OPDRegistration.model.mjs";
 import { ApiError } from "../../utils/ApiError.mjs";
 import { ApiResponse } from "../../utils/ApiResponse.mjs";
 import { asyncHandler } from "../../utils/asyncHandler.mjs";
-import { isAfter, isBefore } from "date-fns";
+import { PaymentRecieptModel } from "../../../DBRepo/IPD/PaymenModels/PaymentRecieptModel.mjs";
+// opd registration
 const OPDRegistration = asyncHandler(async (req, res) => {
   const {
     mrNo,
@@ -32,8 +33,22 @@ const OPDRegistration = asyncHandler(async (req, res) => {
     ].every(Boolean)
   )
     throw new ApiError(402, "ALL PARAMETERS ARE REQUIRED !!!");
-
-
+  // payment No
+  const generatePayment = async (opdNo, date) => {
+    const payment = await PaymentRecieptModel.create({
+      paymentType,
+      location,
+      paymentAgainst: "OPD Registration",
+      amount,
+      shiftNo,
+      againstNo: opdNo,
+      mrNo,
+      remarks,
+      createdUser: req?.user?.userId,
+      createdOn: date,
+    });
+    return payment;
+  };
   //   new Token
   const generateTodayToken = async () => {
     const newTokenDoc = await OPDRegModel.create({
@@ -50,11 +65,14 @@ const OPDRegistration = asyncHandler(async (req, res) => {
       amount,
       tokenNo: 1,
       shiftNo,
-      compDate: await getCreatedOnDate()
+      compDate: await getCreatedOnDate(),
     });
-    return newTokenDoc;
+    const payment = await generatePayment(
+      newTokenDoc?.opdNo,
+      newTokenDoc?.createdOn
+    );
+    return { newTokenDoc, payment };
   };
-
   //   other token
   const generateOtherToken = async () => {
     const newTokenDoc = await OPDRegModel.create({
@@ -71,11 +89,15 @@ const OPDRegistration = asyncHandler(async (req, res) => {
       amount,
       tokenNo: lastDoc[0].tokenNo + 1,
       shiftNo,
-      compDate: await getCreatedOnDate()
+      compDate: await getCreatedOnDate(),
     });
-    return newTokenDoc;
+    const payment = await generatePayment(
+      newTokenDoc?.opdNo,
+      newTokenDoc?.createdOn
+    );
+    return { newTokenDoc, payment };
   };
-
+  console.log(generateOtherToken, generateTodayToken);
   const lastDoc = await OPDRegModel.find({ consultantId })
     .sort({ tokenNo: -1 })
     .limit(1)
@@ -85,19 +107,15 @@ const OPDRegistration = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, { data: newToken }));
   }
   console.log("lastDoc", lastDoc);
-  // const dateTime = moment(response[0].createdOn, 'DD/MM/YYYY HH:mm:ss').format('DD/MM/YYYY');
-  // const day = moment(dateTime, 'DD/MM/YYYY').startOf('day')
-  // console.log('date', day);
+
   const todayDate = await getCreatedOnDate();
   const lastDocDate = lastDoc[0]?.compDate;
 
-  //   date1 = 31/10/2023 10:55:10
-  // date2 = 30/10/2023 20:15:36
+  //   date1 = 31/10/2023
+  // date2 = 30/10/2023
 
   const date1 = moment(todayDate, "DD/MM/YYYY");
   const date2 = moment(lastDocDate, "DD/MM/YYYY");
-
-  console.log({ date1, date2 });
 
   if (date1.isAfter(date2)) {
     const newToken = await generateTodayToken();
@@ -111,4 +129,24 @@ const OPDRegistration = asyncHandler(async (req, res) => {
   }
 });
 
-export { OPDRegistration };
+const OPDToken = asyncHandler(async (req, res) => {
+  const { consultantId } = req?.query;
+  if (!consultantId) throw new ApiError(401, "CONSULTANT ID IS REUIRED !!!");
+  const lastToken = await OPDRegModel.find({
+    consultantId,
+    compDate: await getCreatedOnDate(),
+  })
+    .sort({ tokenNo: -1 })
+    .limit(1)
+    .exec();
+  if (lastToken.length <= 0) {
+    return res.status(200).json(new ApiResponse(200, { data: { tokenNo: 1 } }));
+  } else {
+    const lastTokenNo = lastToken[0].tokenNo;
+    return res
+      .status(200)
+      .json(new ApiResponse(200, { data: { tokenNo: lastTokenNo + 1 } }));
+  }
+});
+
+export { OPDRegistration, OPDToken };
