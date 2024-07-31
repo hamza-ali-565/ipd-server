@@ -20,7 +20,7 @@ const OpdConsCharges = asyncHandler(async (req, res) => {
       $set: {
         amount,
         updatedUser: req.user?.userId,
-        updatedOn: getCreatedOn()
+        updatedOn: getCreatedOn(),
       },
     },
     { new: true }
@@ -70,4 +70,4 @@ const FindDrCharges = asyncHandler(async (req, res) => {
   throw new ApiError(400, "DATA NOT FOUND !!!");
 });
 
-export { OpdConsCharges , FindDrCharges};
+export { OpdConsCharges, FindDrCharges };
