@@ -218,7 +218,7 @@ const registeredOPD = asyncHandler(async (_, res) => {
 const OPDToPrint = asyncHandler(async (req, res) => {
   const { opdNo, mrNo } = req.query;
   if (!opdNo || !mrNo)
-    throw new ApiError(402, "RADIOLOGY/MR-No NO IS REQUIRED !!!");
+    throw new ApiError(402, "OPD/MR-No NO IS REQUIRED !!!");
   const OPDdata = await OPDRegModel.find({ opdNo });
   const paymentdata = await PaymentRecieptModel.find({
     againstNo: opdNo,
