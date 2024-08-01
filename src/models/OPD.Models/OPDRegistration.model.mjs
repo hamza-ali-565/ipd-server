@@ -20,6 +20,9 @@ const opdRegistration = new Schema({
   createdOn: { type: String, required: true },
   amount: { type: String, required: true },
   shiftNo: { type: String, required: true },
+  isDeleted: { type: Boolean, default: false },
+  deletedUser: { type: String },
+  deletedOn: { type: String },
 });
 
 opdRegistration.plugin(AutoIncrement, { inc_field: "opdNo" });

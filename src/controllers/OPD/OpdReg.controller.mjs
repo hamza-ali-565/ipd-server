@@ -5,6 +5,7 @@ import { ApiError } from "../../utils/ApiError.mjs";
 import { ApiResponse } from "../../utils/ApiResponse.mjs";
 import { asyncHandler } from "../../utils/asyncHandler.mjs";
 import { PaymentRecieptModel } from "../../../DBRepo/IPD/PaymenModels/PaymentRecieptModel.mjs";
+import { PatientRegModel } from "../../../DBRepo/IPD/PatientModel/PatientRegModel.mjs";
 // opd registration
 const OPDRegistration = asyncHandler(async (req, res) => {
   const {
@@ -33,6 +34,7 @@ const OPDRegistration = asyncHandler(async (req, res) => {
     ].every(Boolean)
   )
     throw new ApiError(402, "ALL PARAMETERS ARE REQUIRED !!!");
+  const mrData = await PatientRegModel.find({ MrNo: mrNo });
   // payment No
   const generatePayment = async (opdNo, date) => {
     const payment = await PaymentRecieptModel.create({
@@ -71,7 +73,7 @@ const OPDRegistration = asyncHandler(async (req, res) => {
       newTokenDoc?.opdNo,
       newTokenDoc?.createdOn
     );
-    return { newTokenDoc, payment };
+    return { data: [newTokenDoc], data1: [payment] };
   };
   //   other token
   const generateOtherToken = async () => {
@@ -95,7 +97,7 @@ const OPDRegistration = asyncHandler(async (req, res) => {
       newTokenDoc?.opdNo,
       newTokenDoc?.createdOn
     );
-    return { newTokenDoc, payment };
+    return { data: [newTokenDoc], data1: [payment] };
   };
   console.log(generateOtherToken, generateTodayToken);
   const lastDoc = await OPDRegModel.find({ consultantId })
@@ -119,13 +121,31 @@ const OPDRegistration = asyncHandler(async (req, res) => {
 
   if (date1.isAfter(date2)) {
     const newToken = await generateTodayToken();
-    return res.status(200).json(new ApiResponse(200, { data: newToken }));
+    return res.status(200).json(
+      new ApiResponse(200, {
+        data: newToken?.data,
+        data1: newToken?.data1,
+        data2: mrData,
+      })
+    );
   } else if (date1.isBefore(date2)) {
     const newToken = await generateTodayToken();
-    return res.status(200).json(new ApiResponse(200, { data: newToken }));
+    return res.status(200).json(
+      new ApiResponse(200, {
+        data: newToken?.data,
+        data1: newToken?.data1,
+        data2: mrData,
+      })
+    );
   } else {
     const newToken = await generateOtherToken();
-    return res.status(200).json(new ApiResponse(200, { data: newToken }));
+    return res.status(200).json(
+      new ApiResponse(200, {
+        data: newToken?.data,
+        data1: newToken?.data1,
+        data2: mrData,
+      })
+    );
   }
 });
 
@@ -149,4 +169,74 @@ const OPDToken = asyncHandler(async (req, res) => {
   }
 });
 
-export { OPDRegistration, OPDToken };
+// get opd reg for madal view
+
+const registeredOPD = asyncHandler(async (_, res) => {
+  const response = await OPDRegModel.find({
+    isDeleted: false,
+  });
+  if (response.length < 0) throw new ApiError(400, "NO DATA FOUND !!!");
+  const mrNos = response.map((item) => item.mrNo);
+  const patientDetails = await PatientRegModel.find({ MrNo: { $in: mrNos } });
+  const mrNoToPatientNameMap = patientDetails.reduce((acc, patient) => {
+    acc[patient?.MrNo] = {
+      patientName: patient?.patientName,
+      patientType: patient?.patientType,
+      relativeType: patient?.relativeType,
+      relativeName: patient?.relativeName,
+      ageYear: patient?.ageYear,
+      ageMonth: patient?.ageMonth,
+      ageDay: patient?.ageDay,
+      gender: patient?.gender,
+      cellNo: patient?.cellNo,
+    };
+    return acc;
+  }, {});
+
+  // Step 4: Add patientName to the original response
+  const updatedResponse = response.map((item) => ({
+    _id: item._id,
+    mrNo: item.mrNo,
+    opdNo: item.opdNo,
+    patientName: mrNoToPatientNameMap[item.mrNo]?.patientName,
+    patientType: mrNoToPatientNameMap[item.mrNo]?.patientType,
+    relativeType: mrNoToPatientNameMap[item.mrNo]?.relativeType,
+    relativeName: mrNoToPatientNameMap[item.mrNo]?.relativeName,
+    ageYear: mrNoToPatientNameMap[item.mrNo]?.ageYear,
+    ageMonth: mrNoToPatientNameMap[item.mrNo]?.ageMonth,
+    ageDay: mrNoToPatientNameMap[item.mrNo]?.ageDay,
+    cellNo: mrNoToPatientNameMap[item.mrNo]?.cellNo,
+    gender: mrNoToPatientNameMap[item.mrNo]?.gender,
+  }));
+  res
+    .status(200)
+    .json(new ApiResponse(200, { data: updatedResponse }, "DATA RECEIVED "));
+});
+
+// get radiology for print PDF
+
+const OPDToPrint = asyncHandler(async (req, res) => {
+  const { opdNo, mrNo } = req.query;
+  if (!opdNo || !mrNo)
+    throw new ApiError(402, "RADIOLOGY/MR-No NO IS REQUIRED !!!");
+  const OPDdata = await OPDRegModel.find({ opdNo });
+  const paymentdata = await PaymentRecieptModel.find({
+    againstNo: opdNo,
+  });
+  const patientData = await PatientRegModel.find({ MrNo: mrNo });
+  res.status(200).json(
+    new ApiResponse(200, {
+      data: OPDdata,
+      data1: paymentdata,
+      data2: patientData,
+    })
+  );
+});
+
+// update Many
+const updateIsDelete = asyncHandler(async (req, res) => {
+  const updateMani = await OPDRegModel.updateMany({}, { isDeleted: false });
+  res.status(200).json(new ApiResponse(200, { updateMani }, "data updates"));
+});
+
+export { OPDRegistration, OPDToken, registeredOPD, updateIsDelete, OPDToPrint };

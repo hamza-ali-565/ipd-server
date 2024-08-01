@@ -8,6 +8,9 @@ import { ConsultantSchedule } from "../../controllers/OPD/Speciality.controller.
 import {
   OPDRegistration,
   OPDToken,
+  OPDToPrint,
+  registeredOPD,
+  updateIsDelete,
 } from "../../controllers/OPD/OpdReg.controller.mjs";
 
 const router = Router();
@@ -18,5 +21,8 @@ router.route("/consultantSchedule").get(ConsultantSchedule);
 router.route("/findDrChargesPartyWise").get(FindDrChargesPartyWise);
 router.route("/opdRegistraion").post(OPDRegistration);
 router.route("/lastToken").get(OPDToken);
+router.route("/registeredOpd").get(registeredOPD);
+router.route("/updateMore").put(updateIsDelete);
+router.route("/forPrintdata").get(OPDToPrint);
 
 export default router;
