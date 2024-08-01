@@ -6,6 +6,8 @@ import { ApiResponse } from "../../utils/ApiResponse.mjs";
 import { asyncHandler } from "../../utils/asyncHandler.mjs";
 import { PaymentRecieptModel } from "../../../DBRepo/IPD/PaymenModels/PaymentRecieptModel.mjs";
 import { PatientRegModel } from "../../../DBRepo/IPD/PatientModel/PatientRegModel.mjs";
+import { PaymentRefundModal } from "../../../DBRepo/IPD/PaymenModels/PaymentRefundModel.mjs";
+
 // opd registration
 const OPDRegistration = asyncHandler(async (req, res) => {
   const {
@@ -61,13 +63,13 @@ const OPDRegistration = asyncHandler(async (req, res) => {
       consultantId,
       paymentType,
       location,
-      createdOn: await getCreatedOn(),
+      createdOn: getCreatedOn(),
       createdUser: req.user?.userId,
       remarks,
       amount,
       tokenNo: 1,
       shiftNo,
-      compDate: await getCreatedOnDate(),
+      compDate: getCreatedOnDate(),
     });
     const payment = await generatePayment(
       newTokenDoc?.opdNo,
@@ -101,7 +103,7 @@ const OPDRegistration = asyncHandler(async (req, res) => {
   };
 
   const lastDoc = await OPDRegModel.find({ consultantId })
-    .sort({ tokenNo: -1 })
+    .sort({ opdNo: -1 })
     .limit(1)
     .exec();
   if (lastDoc.length <= 0) {
@@ -110,9 +112,11 @@ const OPDRegistration = asyncHandler(async (req, res) => {
   }
   console.log("lastDoc", lastDoc);
 
-  const todayDate = await getCreatedOnDate();
+  const todayDate = getCreatedOnDate();
   const lastDocDate = lastDoc[0]?.compDate;
 
+  console.log("today ", todayDate);
+  console.log("last doc ", lastDocDate);
   //   date1 = 31/10/2023
   // date2 = 30/10/2023
 
@@ -216,14 +220,20 @@ const registeredOPD = asyncHandler(async (_, res) => {
 // get radiology for print PDF
 
 const OPDToPrint = asyncHandler(async (req, res) => {
-  const { opdNo, mrNo } = req.query;
-  if (!opdNo || !mrNo)
-    throw new ApiError(402, "OPD/MR-No NO IS REQUIRED !!!");
+  const { opdNo, mrNo, message } = req.query;
+  if (!opdNo || !mrNo) throw new ApiError(402, "OPD/MR-No NO IS REQUIRED !!!");
   const OPDdata = await OPDRegModel.find({ opdNo });
   const paymentdata = await PaymentRecieptModel.find({
     againstNo: opdNo,
   });
   const patientData = await PatientRegModel.find({ MrNo: mrNo });
+  if (message) {
+    return res.status(200).json(
+      new ApiResponse(200, {
+        data: OPDdata,
+      })
+    );
+  }
   res.status(200).json(
     new ApiResponse(200, {
       data: OPDdata,
@@ -239,4 +249,100 @@ const updateIsDelete = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, { updateMani }, "data updates"));
 });
 
-export { OPDRegistration, OPDToken, registeredOPD, updateIsDelete, OPDToPrint };
+// opd refund
+const OPDRefund = asyncHandler(async (req, res) => {
+  const {
+    refundAgainst,
+    refundType,
+    location,
+    refundAmount,
+    shiftNo,
+    againstNo,
+    mrNo,
+    remarks,
+  } = req.body;
+  if (
+    ![
+      refundAgainst,
+      refundType,
+      location,
+      refundAmount,
+      shiftNo,
+      againstNo,
+      mrNo,
+    ].every(Boolean)
+  )
+    throw new ApiError(402, "ALL PARAMETERS ARE REQUIRED !!!");
+
+  const updateOpdDoc = await OPDRegModel.findOneAndUpdate(
+    { opdNo: againstNo, mrNo },
+    {
+      $set: {
+        isDeleted: true,
+        deletedUser: req?.user?.userId,
+        deletedOn: getCreatedOn(),
+      },
+    },
+    { new: true }
+  );
+  if (!updateOpdDoc) throw new ApiError(404, "ERROR PLEASE TRY LATER !!!");
+  const createRefundNo = await PaymentRefundModal.create({
+    refundAgainst,
+    refundType,
+    location,
+    refundAmount,
+    shiftNo,
+    againstNo,
+    mrNo,
+    remarks,
+    createdUser: req?.user?.userId,
+    createdOn: updateOpdDoc?.deletedOn,
+  });
+
+  const patientDetails = await PatientRegModel.find({ MrNo: mrNo });
+
+  const mrNoToPatientNameMap = patientDetails.reduce((acc, patient) => {
+    acc[patient?.MrNo] = {
+      patientName: patient?.patientName,
+      patientType: patient?.patientType,
+      relativeType: patient?.relativeType,
+      relativeName: patient?.relativeName,
+      ageYear: patient?.ageYear,
+      ageMonth: patient?.ageMonth,
+      ageDay: patient?.ageDay,
+      gender: patient?.gender,
+      cellNo: patient?.cellNo,
+      address: patient?.address,
+    };
+    return acc;
+  }, {});
+
+  const patientInfo = mrNoToPatientNameMap[mrNo] || {};
+
+  const updatedResponse = {
+    _id: createRefundNo._id,
+    mrNo: createRefundNo.mrNo,
+    againstNo: createRefundNo.againstNo,
+    amount: createRefundNo.refundAmount,
+    createdUser: createRefundNo.createdUser,
+    createdOn: createRefundNo.createdOn,
+    location: createRefundNo.location,
+    paymentAgainst: createRefundNo.refundAgainst,
+    paymentType: createRefundNo.refundType,
+    remarks: createRefundNo.remarks,
+    shiftNo: createRefundNo.shiftNo,
+    paymentNo: createRefundNo.refundNo,
+    ...patientInfo,
+  };
+
+  return res.status(200).json(new ApiResponse(200, { data: updatedResponse }));
+});
+
+export {
+  OPDRegistration,
+  OPDToken,
+  registeredOPD,
+  updateIsDelete,
+  OPDToPrint,
+  OPDRefund,
+};

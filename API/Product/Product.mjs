@@ -6,8 +6,6 @@ const router = express.Router();
 
 router.get("/product", async (req, res) => {
   try {
-    console.log("Secret", process.env.ACCESS_TOKEN_SECRET);
-    console.log(req.cookies.Token);
     const token = req.cookies.Token;
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     const _id = decoded._id;

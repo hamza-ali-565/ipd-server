@@ -6,6 +6,7 @@ import {
 } from "../../controllers/OPD/ConsCharges.controller.mjs";
 import { ConsultantSchedule } from "../../controllers/OPD/Speciality.controller.mjs";
 import {
+  OPDRefund,
   OPDRegistration,
   OPDToken,
   OPDToPrint,
@@ -24,5 +25,6 @@ router.route("/lastToken").get(OPDToken);
 router.route("/registeredOpd").get(registeredOPD);
 router.route("/updateMore").put(updateIsDelete);
 router.route("/forPrintdata").get(OPDToPrint);
+router.route("/opdRefund").put(OPDRefund);
 
 export default router;

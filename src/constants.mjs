@@ -1,9 +1,9 @@
 import moment from "moment-timezone";
 
-export const getCreatedOn = async () => {
+export const getCreatedOn = () => {
   return moment(new Date()).tz("Asia/Karachi").format("DD/MM/YYYY HH:mm:ss");
 };
-export const getCreatedOnDate = async () => {
+export const getCreatedOnDate = () => {
   return moment(new Date()).tz("Asia/Karachi").format("DD/MM/YYYY");
 };
 
