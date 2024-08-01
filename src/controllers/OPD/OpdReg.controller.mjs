@@ -99,7 +99,7 @@ const OPDRegistration = asyncHandler(async (req, res) => {
     );
     return { data: [newTokenDoc], data1: [payment] };
   };
-  console.log(generateOtherToken, generateTodayToken);
+
   const lastDoc = await OPDRegModel.find({ consultantId })
     .sort({ tokenNo: -1 })
     .limit(1)
