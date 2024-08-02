@@ -18,6 +18,8 @@ const labTest = new Schema({
   thisIs: { type: String, required: true },
   createdUser: { type: String, required: true },
   createdOn: { type: String, default: getCreatedOn() },
+  updatedUser: { type: String },
+  updatedOn: { type: String },
   // groupInfo: {},
 });
 
