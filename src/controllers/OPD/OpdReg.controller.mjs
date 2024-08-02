@@ -87,13 +87,13 @@ const OPDRegistration = asyncHandler(async (req, res) => {
       consultantId,
       paymentType,
       location,
-      createdOn: await getCreatedOn(),
+      createdOn: getCreatedOn(),
       createdUser: req.user?.userId,
       remarks,
       amount,
       tokenNo: lastDoc[0].tokenNo + 1,
       shiftNo,
-      compDate: await getCreatedOnDate(),
+      compDate: getCreatedOnDate(),
     });
     const payment = await generatePayment(
       newTokenDoc?.opdNo,
