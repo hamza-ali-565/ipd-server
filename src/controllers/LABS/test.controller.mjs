@@ -100,8 +100,14 @@ const labTest = asyncHandler(async (req, res) => {
 
 // get test to show details on modal and update
 
-const LabTestToUpdate = asyncHandler(async (_, res) => {
-  const response = await labTestModel.find({});
+const LabTestToUpdate = asyncHandler(async (req, res) => {
+  const { thisIs } = req?.query;
+  console.log(thisIs);
+
+  if (!thisIs) throw new ApiError(404, "ALL PARAMETERS ARE REQUIRED !!!");
+  const response = await labTestModel.find({
+    $or: [{ thisIs }, { department: thisIs }],
+  });
   if (!response) throw new ApiError(402, "DATA NOT FOUND !!!");
   res.status(200).json(new ApiResponse(200, { data: response }));
 });
