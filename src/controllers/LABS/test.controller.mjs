@@ -18,14 +18,9 @@ const labTest = asyncHandler(async (req, res) => {
   } = req.body;
 
   if (
-    ![
-      testName,
-      department,
-      category,
-      testType,
-      reportDays,
-      style,
-    ].every(Boolean)
+    ![testName, department, category, testType, reportDays, style].every(
+      Boolean
+    )
   ) {
     throw new ApiError(400, "All fields are required");
   }
@@ -35,8 +30,7 @@ const labTest = asyncHandler(async (req, res) => {
     rangeInfo = testRanges.filter((items) => items.equipment !== "");
   }
 
-  console.log("BODY", req.body);
-
+  console.log(" Equip", rangeInfo);
 
   // create lab
   const createTest = async () => {
@@ -71,7 +65,7 @@ const labTest = asyncHandler(async (req, res) => {
           testRanges: rangeInfo,
           thisIs: "Test",
           updatedUser: req?.user?.userId,
-          updatedOn: getCreatedOn()
+          updatedOn: getCreatedOn(),
         },
       },
       { new: true }
@@ -106,7 +100,7 @@ const labTest = asyncHandler(async (req, res) => {
 
 // get test to show details on modal and update
 
-const LabTestToUpdate = asyncHandler(async (req, res) => {
+const LabTestToUpdate = asyncHandler(async (_, res) => {
   const response = await labTestModel.find({});
   if (!response) throw new ApiError(402, "DATA NOT FOUND !!!");
   res.status(200).json(new ApiResponse(200, { data: response }));
