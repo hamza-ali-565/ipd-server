@@ -9,7 +9,7 @@ const labTest = new Schema({
   testCode: { type: Number, unique: true },
   testName: { type: String, required: true, uppercase: true },
   department: { type: String, required: true },
-  category: { type: String, required: true },
+  category: { type: String },
   testType: { type: String, required: true },
   reportDays: { type: String, required: true },
   active: { type: Boolean, required: true },
@@ -20,7 +20,7 @@ const labTest = new Schema({
   createdOn: { type: String, default: getCreatedOn() },
   updatedUser: { type: String },
   updatedOn: { type: String },
-  // groupInfo: {},
+  groupParams: { type: Array },
 });
 
 labTest.plugin(AutoIncrement, { inc_field: "testCode" });

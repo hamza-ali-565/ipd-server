@@ -14,20 +14,25 @@ const labTest = asyncHandler(async (req, res) => {
     active,
     style,
     testRanges,
+    groupParams,
     _id,
+    thisIs,
   } = req.body;
 
-  if (
-    ![testName, department, category, testType, reportDays, style].every(
-      Boolean
-    )
-  ) {
+  if (![testName, department, testType, reportDays, thisIs].every(Boolean)) {
     throw new ApiError(400, "All fields are required");
   }
-
+  if (thisIs === "Test") {
+    if (!category) {
+      throw new ApiError(404, "CATEGORY IS REQUIRED !!!");
+      return;
+    }
+  }
   let rangeInfo = [];
-  if (testRanges.length > 0) {
-    rangeInfo = testRanges.filter((items) => items.equipment !== "");
+  if (testRanges) {
+    if (testRanges.length > 0) {
+      rangeInfo = testRanges.filter((items) => items.equipment !== "");
+    }
   }
 
   console.log(" Equip", rangeInfo);
@@ -43,8 +48,9 @@ const labTest = asyncHandler(async (req, res) => {
       active,
       style,
       testRanges: rangeInfo,
-      thisIs: "Test",
+      thisIs,
       createdUser: req?.user?.userId,
+      groupParams,
     });
     return response;
   };
@@ -63,7 +69,7 @@ const labTest = asyncHandler(async (req, res) => {
           active,
           style,
           testRanges: rangeInfo,
-          thisIs: "Test",
+          thisIs,
           updatedUser: req?.user?.userId,
           updatedOn: getCreatedOn(),
         },
@@ -101,14 +107,21 @@ const labTest = asyncHandler(async (req, res) => {
 // get test to show details on modal and update
 
 const LabTestToUpdate = asyncHandler(async (req, res) => {
-  const { thisIs } = req?.query;
-  console.log(thisIs);
+  let { thisIs, fGroup } = req?.query;
+  console.log(req.query);
+  
 
   if (!thisIs) throw new ApiError(404, "ALL PARAMETERS ARE REQUIRED !!!");
   const response = await labTestModel.find({
     $or: [{ thisIs }, { department: thisIs }],
   });
   if (!response) throw new ApiError(402, "DATA NOT FOUND !!!");
+
+  if (fGroup !== '') {
+    const updatedData = response.filter((item) => item.thisIs !== "Group");
+    res.status(200).json(new ApiResponse(200, { data: updatedData }));
+    return;
+  }
   res.status(200).json(new ApiResponse(200, { data: response }));
 });
 
