@@ -3,7 +3,9 @@ import { asyncHandler } from "../../utils/asyncHandler.mjs";
 import { ApiResponse } from "../../utils/ApiResponse.mjs";
 import { labTestModel } from "../../models/LAB.Models/test.model.mjs";
 import { getCreatedOn } from "../../constants.mjs";
+import { LabChargesModel } from "../../models/LAB.Models/labCharges.model.mjs";
 
+// create lab code
 const labTest = asyncHandler(async (req, res) => {
   const {
     testName,
@@ -105,7 +107,6 @@ const labTest = asyncHandler(async (req, res) => {
 });
 
 // get test to show details on modal and update
-
 const LabTestToUpdate = asyncHandler(async (req, res) => {
   let { thisIs, fGroup } = req?.query;
 
@@ -123,4 +124,61 @@ const LabTestToUpdate = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, { data: response }));
 });
 
-export { labTest, LabTestToUpdate };
+// get lab charges
+const LabChargesCheck = asyncHandler(async (req, res) => {
+  const { partyName, partyId } = req?.query;
+  console.log("query", req?.query);
+
+  if (!partyName || !partyId)
+    throw new ApiError(404, "ALL PARAMETERS ARE REQUIRED !!!");
+  const testNames = await labTestModel.find({
+    $or: [{ category: "Test"}, {thisIs: "Group" }],
+  });
+
+  // {
+  //   category: "Test",
+  //   thisIs: "Group",
+  // }
+
+  console.log(testNames);
+
+  const formatedData = testNames.map((items) => ({
+    testName: items?.testName,
+    testCode: items?.testCode,
+    testId: items?._id,
+    department: items?.department,
+    charges: 0,
+    status: false,
+  }));
+
+  // check if rates previously exist
+  const prevChargesCheck = await LabChargesModel.find({ partyId, partyName });
+
+  if (prevChargesCheck.length <= 0) {
+    return res.status(200).json(new ApiResponse(200, { data: formatedData }));
+  }
+
+  const idsFromPrevCharges = prevChargesCheck[0].labDetails.map((items) =>
+    items?.testId.toString()
+  );
+
+  const filterChargedIdsFromTestName = testNames.filter((items) => {
+    const testNamesId = items?._id.toUpperCase();
+    const isIncluded = idsFromPrevCharges.includes(testNamesId);
+    return !isIncluded;
+  });
+
+  const newData = [
+    ...prevChargesCheck[0]?.serviceDetails,
+    ...filterChargedIdsFromTestName.map((item) => ({
+      serviceName: item?.serviceName,
+      serviceId: item?._id,
+      charges: 0,
+      status: false,
+    })),
+  ];
+
+  return res.status.json(new ApiResponse(200, { data: newData }));
+});
+
+export { labTest, LabTestToUpdate, LabChargesCheck };
