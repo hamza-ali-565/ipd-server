@@ -108,8 +108,6 @@ const labTest = asyncHandler(async (req, res) => {
 
 const LabTestToUpdate = asyncHandler(async (req, res) => {
   let { thisIs, fGroup } = req?.query;
-  console.log(req.query);
-  
 
   if (!thisIs) throw new ApiError(404, "ALL PARAMETERS ARE REQUIRED !!!");
   const response = await labTestModel.find({
@@ -117,7 +115,7 @@ const LabTestToUpdate = asyncHandler(async (req, res) => {
   });
   if (!response) throw new ApiError(402, "DATA NOT FOUND !!!");
 
-  if (fGroup !== '') {
+  if (fGroup !== "") {
     const updatedData = response.filter((item) => item.thisIs !== "Group");
     res.status(200).json(new ApiResponse(200, { data: updatedData }));
     return;
