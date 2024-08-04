@@ -135,13 +135,6 @@ const LabChargesCheck = asyncHandler(async (req, res) => {
     $or: [{ category: "Test"}, {thisIs: "Group" }],
   });
 
-  // {
-  //   category: "Test",
-  //   thisIs: "Group",
-  // }
-
-  console.log(testNames);
-
   const formatedData = testNames.map((items) => ({
     testName: items?.testName,
     testCode: items?.testCode,
@@ -163,13 +156,13 @@ const LabChargesCheck = asyncHandler(async (req, res) => {
   );
 
   const filterChargedIdsFromTestName = testNames.filter((items) => {
-    const testNamesId = items?._id.toUpperCase();
+    const testNamesId = items?._id.toString();
     const isIncluded = idsFromPrevCharges.includes(testNamesId);
     return !isIncluded;
   });
 
   const newData = [
-    ...prevChargesCheck[0]?.serviceDetails,
+    ...prevChargesCheck[0]?.labDetails,
     ...filterChargedIdsFromTestName.map((item) => ({
       serviceName: item?.serviceName,
       serviceId: item?._id,
