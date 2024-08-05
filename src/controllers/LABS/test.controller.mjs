@@ -132,10 +132,20 @@ const LabChargesCheck = asyncHandler(async (req, res) => {
   if (!partyName || !partyId)
     throw new ApiError(404, "ALL PARAMETERS ARE REQUIRED !!!");
 
-// conditional statement to get data of both tests and group    
+  // conditional statement to get data of both tests and group
   const testNames = await labTestModel.find({
-    $or: [{ category: "Test"}, {thisIs: "Group" }],
+    $and: [
+      { active: true },
+      {
+        $or: [{ thisIs: "Test" }, { thisIs: "Group" }],
+      },
+    ],
   });
+  // const testNames = await labTestModel.find({
+  //   $or: [{ thisIs: "Test" }, { thisIs: "Group" }, { active: true }],
+  // });
+
+  console.log(" test Name ", testNames);
 
   const formatedData = testNames.map((items) => ({
     testName: items?.testName,
