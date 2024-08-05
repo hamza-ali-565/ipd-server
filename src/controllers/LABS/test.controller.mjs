@@ -131,6 +131,8 @@ const LabChargesCheck = asyncHandler(async (req, res) => {
 
   if (!partyName || !partyId)
     throw new ApiError(404, "ALL PARAMETERS ARE REQUIRED !!!");
+
+// conditional statement to get data of both tests and group    
   const testNames = await labTestModel.find({
     $or: [{ category: "Test"}, {thisIs: "Group" }],
   });
