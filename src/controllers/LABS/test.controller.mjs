@@ -37,7 +37,6 @@ const labTest = asyncHandler(async (req, res) => {
     }
   }
 
-
   // create lab
   const createTest = async () => {
     const response = await labTestModel.create({
@@ -81,6 +80,23 @@ const labTest = asyncHandler(async (req, res) => {
     return response;
   };
 
+  // update Many Lab
+  const updateManyLabs = async (testId) => {
+    const updateToMany = await LabChargesModel.updateMany(
+      {
+        "labDetails.testId": testId,
+      },
+      {
+        $set: {
+          "labDetails.$.testName": testName,
+          "labDetails.$.department": department,
+          "labDetails.$.status": active,
+        },
+      }
+    );
+    return updateToMany;
+  };
+
   if (!_id) {
     const createData = await createTest(_id);
     return res
@@ -94,13 +110,14 @@ const labTest = asyncHandler(async (req, res) => {
       );
   } else {
     const updateData = await updateTest(_id);
+    const updatedCharges = await updateManyLabs(_id);
     return res
       .status(202)
       .json(
         new ApiResponse(
           202,
-          { data: updateData },
-          "TEST Updated SUCCESSFULLY !!"
+          { data: updateData, updatedCharges },
+          "TEST UPDATED SUCCESSFULLY !!"
         )
       );
   }
@@ -170,6 +187,8 @@ const LabChargesCheck = asyncHandler(async (req, res) => {
   if (prevChargesCheck.length <= 0) {
     return res.status(200).json(new ApiResponse(200, { data: formatedData }));
   }
+
+  console.log("prevChargesCheck", prevChargesCheck);
 
   const idsFromPrevCharges = prevChargesCheck[0].labDetails.map((items) =>
     items?.testId.toString()
