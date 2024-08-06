@@ -110,19 +110,6 @@ const labTest = asyncHandler(async (req, res) => {
 const LabTestToUpdate = asyncHandler(async (req, res) => {
   let { thisIs, fGroup } = req?.query;
 
-  // if (!thisIs) throw new ApiError(404, "ALL PARAMETERS ARE REQUIRED !!!");
-  // const response = await labTestModel.find({
-  //   $or: [{ thisIs }, { department: thisIs }],
-  // });
-  // if (!response) throw new ApiError(402, "DATA NOT FOUND !!!");
-
-  // if (fGroup !== "") {
-  //   const updatedData = response.filter((item) => item.thisIs !== "Group");
-  //   res.status(200).json(new ApiResponse(200, { data: updatedData }));
-  //   return;
-  // }
-  // res.status(200).json(new ApiResponse(200, { data: response }));
-
   const response = await labTestModel.find({});
 
   let FilterData;
@@ -136,7 +123,10 @@ const LabTestToUpdate = asyncHandler(async (req, res) => {
   }
   if (thisIs === "IAmGroupParam") {
     FilterData = response.filter(
-      (item) => item?.thisIs !== "Group" && item?.active !== false && item?.department === fGroup
+      (item) =>
+        item?.thisIs !== "Group" &&
+        item?.active !== false &&
+        item?.department === fGroup
     );
     return res.status(200).json(new ApiResponse(200, { data: FilterData }));
   }
