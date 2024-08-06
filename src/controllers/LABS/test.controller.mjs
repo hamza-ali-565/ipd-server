@@ -101,7 +101,7 @@ const labTest = asyncHandler(async (req, res) => {
         new ApiResponse(
           202,
           { data: updateData },
-          "TEST Updated SUCCESSFULLY !!!"
+          "TEST Updated SUCCESSFULLY !!"
         )
       );
   }
