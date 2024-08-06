@@ -191,7 +191,56 @@ const LabChargesCheck = asyncHandler(async (req, res) => {
     })),
   ];
 
-  return res.status.json(new ApiResponse(200, { data: newData }));
+  return res.status(200).json(new ApiResponse(200, { data: newData }));
 });
 
-export { labTest, LabTestToUpdate, LabChargesCheck };
+//// push lab charges
+const LabChargesPush = asyncHandler(async (req, res) => {
+  const { partyName, partyId, labDetails } = req?.body;
+
+  if (![partyId, partyName, labDetails].every(Boolean))
+    throw new ApiError(404, "ALL PARAMETERS ARE REQUIRED !!!");
+
+  ///// Check already pushed Data
+  const checkAlreadyPushedData = await LabChargesModel.find({ partyId });
+  if (checkAlreadyPushedData.length > 0) {
+    const UpdateData = await LabChargesModel.findOneAndUpdate(
+      { partyId },
+      {
+        $set: {
+          labDetails,
+          updateUser: req.user?.userId,
+          updateOn: getCreatedOn(),
+        },
+      },
+      { new: true }
+    );
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { data: UpdateData },
+          "DATA UPDATED SUCCESSFULLY !!!"
+        )
+      );
+  }
+
+  const response = await LabChargesModel.create({
+    partyName,
+    partyId,
+    createdUser: req.user?.userId,
+    labDetails,
+  });
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { data: response },
+        "LAB CHARGES CREATED SUCCESSFULLY !!!"
+      )
+    );
+});
+export { labTest, LabTestToUpdate, LabChargesCheck, LabChargesPush };
