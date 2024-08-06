@@ -20,4 +20,6 @@ const LabCharges = new Schema({
   ],
 });
 
+
+
 export const LabChargesModel = model("Lab Charges", LabCharges);
