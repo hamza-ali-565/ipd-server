@@ -37,7 +37,6 @@ const labTest = asyncHandler(async (req, res) => {
     }
   }
 
-  console.log(" Equip", rangeInfo);
 
   // create lab
   const createTest = async () => {
