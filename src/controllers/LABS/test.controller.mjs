@@ -262,4 +262,17 @@ const LabChargesPush = asyncHandler(async (req, res) => {
       )
     );
 });
-export { labTest, LabTestToUpdate, LabChargesCheck, LabChargesPush };
+
+const getPushedChargesData = asyncHandler(async (req, res) => {
+  const { partyId } = req.query;
+  if (!partyId) throw new ApiError(404, "ALL PARAMETERS ARE REQUIRED !!!");
+  const response = await LabChargesModel.find({ partyId });
+  if (!response)
+    throw new ApiError(400, "NO CHARGES FOUND AGAINST THIS PARTY !!!");
+  const filterData = response[0]?.labDetails.filter(
+    (items) => items?.status !== false
+  );
+  return res.status(200).json(new ApiResponse(200, { data: filterData }));
+});
+
+export { labTest, LabTestToUpdate, LabChargesCheck, LabChargesPush, getPushedChargesData };
