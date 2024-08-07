@@ -263,6 +263,7 @@ const LabChargesPush = asyncHandler(async (req, res) => {
     );
 });
 
+/// get lab charges party wise
 const getPushedChargesData = asyncHandler(async (req, res) => {
   const { partyId } = req.query;
   if (!partyId) throw new ApiError(404, "ALL PARAMETERS ARE REQUIRED !!!");
@@ -275,4 +276,10 @@ const getPushedChargesData = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, { data: filterData }));
 });
 
-export { labTest, LabTestToUpdate, LabChargesCheck, LabChargesPush, getPushedChargesData };
+export {
+  labTest,
+  LabTestToUpdate,
+  LabChargesCheck,
+  LabChargesPush,
+  getPushedChargesData,
+};
