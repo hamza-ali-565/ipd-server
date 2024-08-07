@@ -5,9 +5,13 @@ const AutoIncrement = AutoIncrementFactory(mongoose.connection);
 
 const LabBooking = new Schema({
   labNo: { type: Number, unique: true },
-  consultantName: { type: String, required: true },
+  consultant: { type: String, required: true },
   consultantId: { type: mongoose.ObjectId, required: true },
+  party: { type: String, required: true },
+  partyId: { type: mongoose.ObjectId, required: true },
+  mrNo: { type: String, required: true },
   labFrom: { type: String, required: true },
+  shiftNo: { type: String, required: true },
   remarks: { type: String },
   isDeletedAll: { type: Boolean, default: false },
   isRemain: { type: Boolean, default: false },
