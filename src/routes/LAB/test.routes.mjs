@@ -8,6 +8,7 @@ import {
 } from "../../controllers/LABS/test.controller.mjs";
 import {
   LabBookingCreator,
+  LabDeletion,
   PrevLabs,
   singleLabPdfPrint,
 } from "../../controllers/LABS/labBooking.controller.mjs";
@@ -25,4 +26,5 @@ router.route("/labsForBooking").get(getPushedChargesData);
 router.route("/labBooking").post(LabBookingCreator);
 router.route("/labBooking").get(PrevLabs);
 router.route("/labBookingForPdf").get(singleLabPdfPrint);
+router.route("/labDeletion").put(LabDeletion);
 export default router;

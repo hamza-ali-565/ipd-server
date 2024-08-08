@@ -192,5 +192,21 @@ const singleLabPdfPrint = asyncHandler(async (req, res) => {
     })
   );
 });
-
-export { LabBookingCreator, PrevLabs, singleLabPdfPrint };
+// Lab deletion on behalf of uniqueId
+const LabDeletion = asyncHandler(async (req, res) => {
+  const { uniqueId } = req?.body;
+  if (!uniqueId) throw new ApiError(404, "UNIQUE ID IS REQUIRED !!!");
+  const updation = await LabBookingModel.findOneAndUpdate(
+    { "labDetails.uniqueId": uniqueId },
+    {
+      $set: {
+        "labDetails.$.isDeleted": true,
+        "labDetails.$.isDeletedUser": req?.user?.userId,
+        "labDetails.$.isDeletedOn": getCreatedOn(),
+      },
+    },
+    { new: true }
+  );
+  return res.status(200).json(200, { data: updation });
+});
+export { LabBookingCreator, PrevLabs, singleLabPdfPrint, LabDeletion };
