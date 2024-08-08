@@ -114,23 +114,21 @@ const LabBookingCreator = asyncHandler(async (req, res) => {
     console.log("myCP", myCP);
 
     const paymentNo = await generatePayment(myCP.labNo, myCP.createdOn);
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          {
-            data: myCP.labDetails,
-            data1: [paymentNo],
-            data2: patient,
-            doctor: myCP?.consultant,
-          },
-          "DATA CREATED SUCCESSFULLY"
-        )
-      );
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          data: myCP.labDetails,
+          data1: [paymentNo],
+          data2: patient,
+          doctor: myCP?.consultant,
+        },
+        "DATA CREATED SUCCESSFULLY"
+      )
+    );
   }
 });
-// find lab No. to print previous labs
+// Lab No(s) with patient name
 const PrevLabs = asyncHandler(async (req, res) => {
   const { labFrom } = req?.query;
 
@@ -169,7 +167,7 @@ const PrevLabs = asyncHandler(async (req, res) => {
 
   return res.status(200).json(new ApiResponse(200, { data: updatedResponse }));
 });
-
+// for print booked lab
 const singleLabPdfPrint = asyncHandler(async (req, res) => {
   const { labNo, mrNo } = req?.query;
   if (![labNo, mrNo].every(Boolean))

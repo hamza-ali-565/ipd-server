@@ -1,6 +1,7 @@
 import mongoose, { Schema, model } from "mongoose";
 import AutoIncrementFactory from "mongoose-sequence";
 import { getCreatedOn } from "../../constants.mjs";
+import { v4 as uuidv4 } from "uuid";
 const AutoIncrement = AutoIncrementFactory(mongoose.connection);
 
 const LabBooking = new Schema({
@@ -23,6 +24,7 @@ const LabBooking = new Schema({
     {
       testName: { type: String },
       testId: { type: mongoose.ObjectId },
+      testCode: { type: Number },
       isDeleted: { type: Boolean, default: false },
       isDeletedOn: { type: String },
       isRefund: { type: Boolean, default: false },
@@ -31,6 +33,7 @@ const LabBooking = new Schema({
       isRefundUser: { type: String },
       amount: { type: Number },
       charges: { type: Number },
+      uniqueId: { type: String, default: uuidv4 },
     },
   ],
 });
