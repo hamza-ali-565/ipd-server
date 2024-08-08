@@ -29,6 +29,8 @@ const LabBooking = new Schema({
       isRefundOn: { type: String },
       isDeletedUser: { type: String },
       isRefundUser: { type: String },
+      amount: { type: Number },
+      charges: { type: Number },
     },
   ],
 });

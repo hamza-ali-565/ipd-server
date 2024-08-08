@@ -101,10 +101,11 @@ router.get("/radiologypdf", async (req, res) => {
       data2: patientData,
       doctor: Radiodata[0]?.consultant,
     });
-  } catch (error) {
+  } catch (error) {                                     
     res.status(400).send({ message: error.message });
   }
 });
+
 
 router.get("/radiologybooking", async (req, res) => {
   try {
@@ -122,6 +123,8 @@ router.get("/radiologybooking", async (req, res) => {
     res.status(400).send({ message: error.message });
   }
 });
+
+
 router.get("/radiologybookingNew", async (req, res) => {
   try {
     const { admissionNo } = req.query;
