@@ -207,6 +207,16 @@ const LabDeletion = asyncHandler(async (req, res) => {
     },
     { new: true }
   );
+  const checkAllDeletion = updation.labDetails.every(
+    (items) => items?.isDeleted
+  );
+
+  if (checkAllDeletion === true) {
+    const finalupdate = await LabBookingModel.updateOne(
+      { "labDetails.uniqueId": uniqueId },
+      { isDeletedAll: true }
+    );
+  }
   return res.status(200).json(200, { data: updation });
 });
 export { LabBookingCreator, PrevLabs, singleLabPdfPrint, LabDeletion };
