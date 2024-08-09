@@ -5,6 +5,7 @@ import { LabBookingModel } from "../../models/LAB.Models/LabBooking.model.mjs";
 import { getCreatedOn } from "../../constants.mjs";
 import { PatientRegModel } from "../../../DBRepo/IPD/PatientModel/PatientRegModel.mjs";
 import { PaymentRecieptModel } from "../../../DBRepo/IPD/PaymenModels/PaymentRecieptModel.mjs";
+import { PaymentRefundModal } from "../../../DBRepo/IPD/PaymenModels/PaymentRefundModel.mjs";
 
 // Creation of Lab Booking
 const LabBookingCreator = asyncHandler(async (req, res) => {
@@ -241,14 +242,118 @@ const refundAmount = asyncHandler(async (req, res) => {
   );
   const sum = filterData.map((items) => (amount += items?.amount));
   console.log("filter Data", filterData);
-  
-  return res.status(200).json(new ApiResponse(200, { data: amount }));
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { data: amount, filterData }));
 });
 
+//const refundCreation
+const refundCreation = asyncHandler(async (req, res) => {
+  const {
+    uniqueId,
+    refundUser,
+    refundAgainst,
+    refundType,
+    location,
+    refundAmount,
+    shiftNo,
+    againstNo,
+    mrNo,
+    remarks,
+  } = req.body;
+  console.log("BODY", req?.body);
+
+  if (
+    ![
+      uniqueId,
+      refundAgainst,
+      refundType,
+      location,
+      refundAmount,
+      shiftNo,
+      againstNo,
+      mrNo,
+    ].every(Boolean)
+  )
+    throw new ApiError(401, "ALL PARAMETERS ARE REQUIRED !!!");
+  if (uniqueId.length <= 0) throw new ApiError(401, "NOTHING TO REFUND !!!");
+  // creation of refund No
+  const createRefundNo = await PaymentRefundModal.create({
+    refundAgainst,
+    refundType,
+    location,
+    refundAmount,
+    shiftNo,
+    againstNo,
+    mrNo,
+    remarks,
+    createdUser: req?.user?.userId,
+    createdOn: getCreatedOn(),
+  });
+  // update lab booking doc
+  const updateDoc = await LabBookingModel.updateMany(
+    {
+      "labDetails.uniqueId": { $in: uniqueId },
+    },
+    {
+      $set: {
+        "labDetails.$[elem].isRefund": true,
+        "labDetails.$[elem].isRefundOn": getCreatedOn(),
+        "labDetails.$[elem].isRefundUser": req.user?.userId,
+        isRemain: false
+      },
+    },
+    {
+      arrayFilters: [{ "elem.uniqueId": { $in: uniqueId } }],
+    }
+  );
+  //patient Data
+  const patientDetails = await PatientRegModel.find({ MrNo: mrNo });
+
+  const mrNoToPatientNameMap = patientDetails.reduce((acc, patient) => {
+    acc[patient?.MrNo] = {
+      patientName: patient?.patientName,
+      patientType: patient?.patientType,
+      relativeType: patient?.relativeType,
+      relativeName: patient?.relativeName,
+      ageYear: patient?.ageYear,
+      ageMonth: patient?.ageMonth,
+      ageDay: patient?.ageDay,
+      gender: patient?.gender,
+      cellNo: patient?.cellNo,
+      address: patient?.address,
+    };
+    return acc;
+  }, {});
+
+  const patientInfo = mrNoToPatientNameMap[mrNo] || {};
+
+  const updatedResponse = {
+    _id: createRefundNo._id,
+    mrNo: createRefundNo.mrNo,
+    againstNo: createRefundNo.againstNo,
+    amount: createRefundNo.refundAmount,
+    createdUser: createRefundNo.createdUser,
+    createdOn: createRefundNo.createdOn,
+    location: createRefundNo.location,
+    paymentAgainst: createRefundNo.refundAgainst,
+    paymentType: createRefundNo.refundType,
+    remarks: createRefundNo.remarks,
+    shiftNo: createRefundNo.shiftNo,
+    paymentNo: createRefundNo.refundNo,
+    ...patientInfo,
+  };
+  //response
+  return res.status(200).json(new ApiResponse(200, { data: updatedResponse }));
+});
+
+//exports
 export {
   LabBookingCreator,
   PrevLabs,
   singleLabPdfPrint,
   LabDeletion,
   refundAmount,
+  refundCreation,
 };

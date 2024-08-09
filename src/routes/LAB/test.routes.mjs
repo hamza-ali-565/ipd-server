@@ -11,6 +11,7 @@ import {
   LabDeletion,
   PrevLabs,
   refundAmount,
+  refundCreation,
   singleLabPdfPrint,
 } from "../../controllers/LABS/labBooking.controller.mjs";
 
@@ -29,4 +30,5 @@ router.route("/labBooking").get(PrevLabs);
 router.route("/labBookingForPdf").get(singleLabPdfPrint);
 router.route("/labDeletion").put(LabDeletion);
 router.route("/labRefundAmount").get(refundAmount);
+router.route("/labRefund").put(refundCreation);
 export default router;
