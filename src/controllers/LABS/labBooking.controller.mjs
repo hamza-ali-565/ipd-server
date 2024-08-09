@@ -128,11 +128,18 @@ const LabBookingCreator = asyncHandler(async (req, res) => {
     );
   }
 });
+
 // Lab No(s) with patient name
 const PrevLabs = asyncHandler(async (req, res) => {
-  const { labFrom } = req?.query;
+  const { labFrom, where } = req?.query;
+  console.log(where);
 
-  const response = await LabBookingModel.find({ isDeletedAll: false, labFrom });
+  let response;
+  if (where === "") {
+    response = await LabBookingModel.find({ isDeletedAll: false, labFrom });
+  } else {
+    response = await LabBookingModel.find({ isRemain: true, labFrom });
+  }
   const carryMrNo = response.map((items) => items?.mrNo);
   const findPatient = await PatientRegModel.find({ MrNo: { $in: carryMrNo } });
   const mrNoToPatientNameMap = {};
@@ -167,6 +174,7 @@ const PrevLabs = asyncHandler(async (req, res) => {
 
   return res.status(200).json(new ApiResponse(200, { data: updatedResponse }));
 });
+
 // for print booked lab
 const singleLabPdfPrint = asyncHandler(async (req, res) => {
   const { labNo, mrNo } = req?.query;
@@ -192,6 +200,7 @@ const singleLabPdfPrint = asyncHandler(async (req, res) => {
     })
   );
 });
+
 // Lab deletion on behalf of uniqueId
 const LabDeletion = asyncHandler(async (req, res) => {
   const { uniqueId } = req?.body;
@@ -203,6 +212,7 @@ const LabDeletion = asyncHandler(async (req, res) => {
         "labDetails.$.isDeleted": true,
         "labDetails.$.isDeletedUser": req?.user?.userId,
         "labDetails.$.isDeletedOn": getCreatedOn(),
+        isRemain: true,
       },
     },
     { new: true }
@@ -219,4 +229,26 @@ const LabDeletion = asyncHandler(async (req, res) => {
   }
   return res.status(200).json(200, { data: updation });
 });
-export { LabBookingCreator, PrevLabs, singleLabPdfPrint, LabDeletion };
+
+// refund Amount No
+const refundAmount = asyncHandler(async (req, res) => {
+  const { labNo } = req.query;
+  if (!labNo) throw new ApiError(404, "LAB NO IS REQUIRED !!!");
+  const data = await LabBookingModel.find({ labNo }).select("labDetails");
+  let amount = 0;
+  const filterData = data[0].labDetails.filter(
+    (items) => items?.isDeleted !== false
+  );
+  const sum = filterData.map((items) => (amount += items?.amount));
+  console.log("filter Data", filterData);
+  
+  return res.status(200).json(new ApiResponse(200, { data: amount }));
+});
+
+export {
+  LabBookingCreator,
+  PrevLabs,
+  singleLabPdfPrint,
+  LabDeletion,
+  refundAmount,
+};
