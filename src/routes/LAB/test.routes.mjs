@@ -7,6 +7,7 @@ import {
   LabTestToUpdate,
 } from "../../controllers/LABS/test.controller.mjs";
 import {
+  BiochemistryTests,
   LabBookingCreator,
   LabDeletion,
   PrevLabs,
@@ -31,4 +32,7 @@ router.route("/labBookingForPdf").get(singleLabPdfPrint);
 router.route("/labDeletion").put(LabDeletion);
 router.route("/labRefundAmount").get(refundAmount);
 router.route("/labRefund").put(refundCreation);
+
+// Lab Result Bio
+router.route("/biochemistry").get(BiochemistryTests);
 export default router;

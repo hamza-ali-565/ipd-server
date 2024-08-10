@@ -6,6 +6,7 @@ import { getCreatedOn } from "../../constants.mjs";
 import { PatientRegModel } from "../../../DBRepo/IPD/PatientModel/PatientRegModel.mjs";
 import { PaymentRecieptModel } from "../../../DBRepo/IPD/PaymenModels/PaymentRecieptModel.mjs";
 import { PaymentRefundModal } from "../../../DBRepo/IPD/PaymenModels/PaymentRefundModel.mjs";
+import { labTestModel } from "../../models/LAB.Models/test.model.mjs";
 
 // Creation of Lab Booking
 const LabBookingCreator = asyncHandler(async (req, res) => {
@@ -301,7 +302,7 @@ const refundCreation = asyncHandler(async (req, res) => {
         "labDetails.$[elem].isRefund": true,
         "labDetails.$[elem].isRefundOn": getCreatedOn(),
         "labDetails.$[elem].isRefundUser": req.user?.userId,
-        isRemain: false
+        isRemain: false,
       },
     },
     {
@@ -348,6 +349,46 @@ const refundCreation = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, { data: updatedResponse }));
 });
 
+// getting test for biochemistry
+
+const BiochemistryTests = asyncHandler(async (req, res) => {
+  const { labNo } = req.query;
+  if (!labNo) throw new ApiError(401, "LAB NO IS REQUIRED !!!");
+
+  // get registered lab
+  const labData = await LabBookingModel.find({ labNo });
+
+  if (labData?.length <= 0) {
+    throw new ApiError(402, "NO DATA FOUND AGAINST THIS LAB NO..");
+  }
+
+  // filter Deleted Tests
+  const filterlabDetails = labData[0].labDetails.filter(
+    (items) => items?.isDeleted !== true
+  );
+  if (filterlabDetails.length <= 0)
+    throw new ApiError(400, "ALL TESTS ARE DELETED !!!");
+  console.log("filter details", filterlabDetails);
+  // extract undeleted ids
+  const ids = filterlabDetails.map((items) => items?.testId);
+
+  // find test / group details of undeleted ids
+  const BioIds = await labTestModel.find({ _id: { $in: ids } });
+
+  // Patient Data
+  const patientData = await PatientRegModel.find({ MrNo: labData[0]?.mrNo });
+
+  console.log("Bio Ids", BioIds);
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, {
+        patientData,
+        labData: BioIds,
+        labCDetails: labData,
+      })
+    );
+});
 //exports
 export {
   LabBookingCreator,
@@ -356,4 +397,5 @@ export {
   LabDeletion,
   refundAmount,
   refundCreation,
+  BiochemistryTests,
 };
