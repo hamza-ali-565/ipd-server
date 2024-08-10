@@ -110,7 +110,6 @@ const OPDRegistration = asyncHandler(async (req, res) => {
     const newToken = await generateTodayToken();
     return res.status(200).json(new ApiResponse(200, { data: newToken }));
   }
-  console.log("lastDoc", lastDoc);
 
   const todayDate = getCreatedOnDate();
   const lastDocDate = lastDoc[0]?.compDate;
