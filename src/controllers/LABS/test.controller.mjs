@@ -94,6 +94,17 @@ const labTest = asyncHandler(async (req, res) => {
         },
       }
     );
+
+    const updateNameInGroup = await labTestModel.updateMany(
+      {
+        "groupParams.testId": testId,
+      },
+      {
+        $set: {
+          "groupParams.$.testName": testName,
+        },
+      }
+    );
     return updateToMany;
   };
 

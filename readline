@@ -1,1 +1,64 @@
 // useTransition in react
+
+// i will provide all details i want output like i have mention
+
+const age = {
+  year: 10,
+  month: 1,
+  day: 22,
+};
+
+const gender = "Male";
+
+const group = [
+  {
+    bold: false,
+    category: "Test",
+    fontSize: "8px",
+    italic: false,
+    serialNo: 1,
+    testCode: 1,
+    testId: "66ad0428022e1a28e99415c2",
+    testName: "CBC ESR",
+    underline: false,
+  },
+  {
+    bold: false,
+    category: "Heading",
+    fontSize: "8px",
+    italic: false,
+    serialNo: 2,
+    testCode: 2,
+    testId: "66ad045d213c9856db89f06a",
+    testName: "L.F.T",
+    underline: false,
+  },
+];
+
+const LFT = [
+  {
+    _id: "66ad045d213c9856db89f06a",
+    testRanges: [
+      { fromAge: 5, toAge: 20, ageType: "Year", normalRanges: "go" },
+      { fromAge: 5, toAge: 20, ageType: "Month", normalRanges: "goa" },
+      { fromAge: 5, toAge: 20, ageType: "Day", normalRanges: "gone" },
+    ],
+  },
+];
+
+const CBC_ESR = [
+  {
+    _id: "66ad0428022e1a28e99415c2",
+    testRanges: [
+      { fromAge: 5, toAge: 20, ageType: "Year", normalRanges: "Alpha" },
+      { fromAge: 5, toAge: 20, ageType: "Month", normalRanges: "Beta" },
+      { fromAge: 5, toAge: 20, ageType: "Day", normalRanges: "gamma" },
+    ],
+  },
+];
+
+
+const output = [
+    {testName: "CBC_ESR", testCode:1, normalRanges: "Alpha"},
+    {testName: "L.F.T", testCode:2, normalRanges: "go"},
+]
