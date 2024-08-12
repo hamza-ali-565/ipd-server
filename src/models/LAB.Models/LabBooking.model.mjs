@@ -34,6 +34,7 @@ const LabBooking = new Schema({
       amount: { type: Number },
       charges: { type: Number },
       uniqueId: { type: String, default: uuidv4 },
+      resultEntry: { type: Boolean, default: false },
     },
   ],
 });

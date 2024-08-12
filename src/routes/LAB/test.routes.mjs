@@ -15,6 +15,7 @@ import {
   refundCreation,
   singleLabPdfPrint,
 } from "../../controllers/LABS/labBooking.controller.mjs";
+import { labResult } from "../../controllers/LABS/labResult.controller.mjs";
 
 const router = Router();
 
@@ -35,4 +36,8 @@ router.route("/labRefund").put(refundCreation);
 
 // Lab Result Bio
 router.route("/biochemistry").get(BiochemistryTests);
+
+// lab result Entry
+router.route("/labResultEntry").post(labResult);
+
 export default router;
