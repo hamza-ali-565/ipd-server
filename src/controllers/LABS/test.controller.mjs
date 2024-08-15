@@ -214,12 +214,15 @@ const LabChargesCheck = asyncHandler(async (req, res) => {
   const newData = [
     ...prevChargesCheck[0]?.labDetails,
     ...filterChargedIdsFromTestName.map((item) => ({
-      serviceName: item?.serviceName,
-      serviceId: item?._id,
+      testName: item?.testName,
+      testCode: item?.testCode,
+      testId: item?._id,
       charges: 0,
       status: false,
     })),
   ];
+
+  console.log("New Data ", newData);
 
   return res.status(200).json(new ApiResponse(200, { data: newData }));
 });

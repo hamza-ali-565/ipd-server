@@ -37,167 +37,138 @@ const labResult = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, { data: result }));
 });
 
-// const convertToDays = ({ year, month, day }) => {
-//   return moment.duration({ years: year, months: month, days: day }).asDays();
-// };
-
-// const findMatchingRange = (testRanges, age, gender) => {
-//   // const totalDays = convertToDays(age);
-//   const totalDays = moment
-//     .duration({
-//       years: age.years,
-//       months: age.months,
-//       days: age.days,
-//     })
-//     .asDays();
-//   console.log("Total days based on age:", totalDays);
-
-//   for (let range of testRanges) {
-//     const fromAgeInDays = convertToDays({
-//       year: range.ageType === "Years" ? range.fromAge : 0,
-//       month: range.ageType === "Months" ? range.fromAge : 0,
-//       day: range.ageType === "Days" ? range.fromAge : 0,
-//     });
-//     const toAgeInDays = convertToDays({
-//       year: range.ageType === "Years" ? range.toAge : 0,
-//       month: range.ageType === "Months" ? range.toAge : 0,
-//       day: range.ageType === "Days" ? range.toAge : 0,
-//     });
-
-//     console.log("Checking range:", {
-//       gender: range.gender,
-//       fromAgeInDays,
-//       toAgeInDays,
-//       normalRanges: range.normalRanges,
-//     });
-
-//     if (
-//       totalDays >= fromAgeInDays &&
-//       totalDays <= toAgeInDays &&
-//       range.gender.toLowerCase() === gender.toLowerCase()
-//     ) {
-//       console.log("Matching range found:", range.normalRanges);
-//       return range.normalRanges;
-//     }
-//   }
-
-//   console.log("No matching range found for", { age, gender });
-//   return null;
-// };
-
-
-// result of biochemistry groups
+// ranges of groups
 // const bioGroupResult = asyncHandler(async (req, res) => {
-//   const { age, gender, groupParams } = req?.body;
+//   const { age, gender, groupParams } = req.body;
 
-//   const testIds = groupParams.groupParams.map((items) => items?.testId);
+//   // Extract test IDs from groupParams
+//   const testIds = groupParams.groupParams.map((item) => item.testId);
 
+//   // Fetch tests with matching IDs
 //   const tests = await labTestModel
 //     .find({ _id: { $in: testIds } })
-//     .select("testRanges");
+//     .select("testRanges category");
 
-//   console.log(gender);
-//   // age: { years: 23, months: 12, days: 22 }
-
-//   // gender : Male
-//   // group are in groupParams for example
-//   // [
-//   //   {
-//   //     serialNo: 1,
-//   //     testCode: 1,
-//   //     testName: 'CBC ESR',
-//   //     category: 'Test',
-//   //     bold: false,
-//   //     italic: false,
-//   //     underline: false,
-//   //     fontSize: '8px',
-//   //     testId: '66ad0428022e1a28e99415c2'
-//   //   },
-//   //   {
-//   //     serialNo: 2,
-//   //     testCode: 2,
-//   //     testName: 'CBC ESR',
-//   //     category: 'Test',
-//   //     bold: false,
-//   //     italic: false,
-//   //     underline: false,
-//   //     fontSize: '8px',
-//   //     testId: '66ad045d213c9856db89f06a'
-//   //   }
-//   // ],
-
-//   // test ranges are in tests constant for example
-//   // [
+//   // tests = [
 //   //   {
 //   //     testRanges: [
-//   //       { fromAge: 5, toAge: 30, ageType: "Years", gender: "Female", normalRanges: "AlphaG" },
-//   //       { fromAge: 5, toAge: 20, ageType: "Months", gender: "Male", normalRanges: "Beta" },
-//   //       { fromAge: 5, toAge: 20, ageType: "Months", gender: "Female",normalRanges: "BetaG" },
-//   //       { fromAge: 5, toAge: 30, ageType: "Years", gender: "Male", normalRanges: "Alpha" },
-//   //       { fromAge: 5, toAge: 20, ageType: "Day", gender: "Male", normalRanges: "gamma" },
-//   //       { fromAge: 5, toAge: 20, ageType: "Day", gender: "Female", normalRanges: "gammaG" },
+//   //       {
+//   //         ageType: "Years",
+//   //         equipment: "Equipment",
+//   //         fromAge: "12",
+//   //         gender: "Male",
+//   //         toAge: "30",
+//   //         normalRaqnges: "1234",
+//   //         unit: "%%",
+//   //       },
+//   //       {
+//   //         ageType: "Years",
+//   //         equipment: "Equipment",
+//   //         fromAge: "12",
+//   //         gender: "Female",
+//   //         toAge: "30",
+//   //         normalRaqnges: "1234",
+//   //         unit: "%%",
+//   //       },
 //   //     ],
-//   //     _id: "66ad0428022e1a28e99415c2",
+//   //     category: "Test",
+//   //     _id: 12,
 //   //   },
-//   //  {
-//   //     testRanges: [
-//   //       { fromAge: 5, toAge: 30, ageType: "Years", gender: "Female", normalRanges: "goG" },
-//   //       { fromAge: 5, toAge: 20, ageType: "Months", gender: "Male", normalRanges: "goa" },
-//   //       { fromAge: 5, toAge: 20, ageType: "Months", gender: "Female",normalRanges: "goaG" },
-//   //       { fromAge: 5, toAge: 30, ageType: "Years", gender: "Male", normalRanges: "go" },
-//   //       { fromAge: 5, toAge: 20, ageType: "Day", gender: "Male", normalRanges: "gone" },
-//   //       { fromAge: 5, toAge: 20, ageType: "Day", gender: "Female", normalRanges: "goneG" },
-//   //     ],
-//   //   _id: "66ad045d213c9856db89f06a",
+
+//   //   {
+//   //     testRanges: [],
+//   //     category: "Heading",
+//   //     _id: 12,
+//   //   },
+
+//   //   {
+//   //     testRanges: [],
+//   //     category: "Heading",
+//   //     _id: 12,
 //   //   },
 //   // ];
-//   //     _id: "66ad045d213c9856db89f06a",
-//   // conclusion i've dianamic data
 
-//   // output should be
-//   // [
-//   //  { serialNo:1, _id: "66ad0428022e1a28e99415c2", ageType: "Years", gender: "Male", normalRanges: "Alpha" },
-//   //  { serialNo:2, _id: "66ad045d213c9856db89f06a", ageType:"Years", gender: "Male", normalRanges: "go" },
-//   //]
+//   console.log("Retrieved test ranges:", tests);
 
-//   const totalDays = moment
-//     .duration({
-//       years: age.years,
-//       months: age.months,
-//       days: age.days,
-//     })
-//     .asDays();
-//   console.log(totalDays);
+//   // Helper function to convert age to days for comparison
+//   const convertToDays = ({ year, month, day }) => {
+//     return moment.duration({ years: year, months: month, days: day }).asDays();
+//   };
 
-//   return res.status(200).json(new ApiResponse(200, { data: tests }));
-//   const output = groupParams.groupParams.map((groupItem) => {
+//   // Function to find a matching range based on age and gender
+//   const findMatchingRange = (testRanges, age, gender) => {
+//     // const totalDays = convertToDays(age);
+//     const totalDays = moment
+//       .duration({
+//         years: age.years,
+//         months: age.months,
+//         days: age.days,
+//       })
+//       .asDays();
+
+//     for (let range of testRanges) {
+//       const fromAgeInDays = convertToDays({
+//         year: range.ageType === "Years" ? parseInt(range.fromAge, 10) : 0,
+//         month: range.ageType === "Months" ? parseInt(range.fromAge, 10) : 0,
+//         day: range.ageType === "Days" ? parseInt(range.fromAge, 10) : 0,
+//       });
+//       const toAgeInDays = convertToDays({
+//         year: range.ageType === "Years" ? parseInt(range.toAge, 10) : 0,
+//         month: range.ageType === "Months" ? parseInt(range.toAge, 10) : 0,
+//         day: range.ageType === "Days" ? parseInt(range.toAge, 10) : 0,
+//       });
+
+//       if (
+//         totalDays >= fromAgeInDays &&
+//         totalDays <= toAgeInDays &&
+//         range.gender.trim().toLowerCase() === gender.trim().toLowerCase()
+//       ) {
+//         return range.normalRanges;
+//       }
+//     }
+
+//     return null;
+//   };
+
+//   // Create output array with matching ranges
+//   const results = groupParams.groupParams.map((item) => {
 //     const test = tests.find(
-//       (testItem) => testItem._id.toString() === groupItem.testId
+//       (testItem) => testItem._id.toString() === item.testId
 //     );
-//     console.log("test of test", test);
 
 //     if (test) {
 //       const normalRanges = findMatchingRange(test.testRanges, age, gender);
 
 //       return {
-//         testName: groupItem.testName,
-//         testCode: groupItem.testCode,
-//         normalRanges,
+//         testName: item.testName,
+//         testCode: item.testCode,
+//         normalRanges: normalRanges || "No Matching Range Found",
+//         serialNo: item.serialNo,
 //       };
 //     } else {
 //       return {
-//         testName: groupItem.testName,
-//         testCode: groupItem.testCode,
-//         normalRanges: null,
+//         testName: item.testName,
+//         testCode: item.testCode,
+//         normalRanges: "No Matching Range Found",
+//         serialNo: item.serialNo,
 //       };
 //     }
 //   });
 
-//   return res.status(200).json(new ApiResponse(200, { data: output }));
+//   //
+//   // output:[
+//   //   {normalRange: "1234", testName:cbc, category: test },
+//   //   {testName:abc, category: heading },
+//   //   ]
+
+//   // Send results as JSON response
+//   res.status(200).json(new ApiResponse(200, { data: results, tests }));
 // });
 
 const bioGroupResult = asyncHandler(async (req, res) => {
   const { age, gender, groupParams } = req.body;
+
+  console.log({ age, gender, groupParams: groupParams?.groupParams });
 
   // Extract test IDs from groupParams
   const testIds = groupParams.groupParams.map((item) => item.testId);
@@ -205,9 +176,9 @@ const bioGroupResult = asyncHandler(async (req, res) => {
   // Fetch tests with matching IDs
   const tests = await labTestModel
     .find({ _id: { $in: testIds } })
-    .select("testRanges");
+    .select("testRanges category testCode");
 
-  console.log("Retrieved test ranges:", tests[0].testRanges);
+  console.log("Retrieved test ranges:", tests);
 
   // Helper function to convert age to days for comparison
   const convertToDays = ({ year, month, day }) => {
@@ -216,17 +187,13 @@ const bioGroupResult = asyncHandler(async (req, res) => {
 
   // Function to find a matching range based on age and gender
   const findMatchingRange = (testRanges, age, gender) => {
-    // const totalDays = convertToDays(age);
     const totalDays = moment
-    .duration({
-      years: age.years,
-      months: age.months,
-      days: age.days,
-    })
-    .asDays();
-
-    console.log("Total Days of Age:", totalDays);
-    console.log("Gender:", gender);
+      .duration({
+        years: age.years,
+        months: age.months,
+        days: age.days,
+      })
+      .asDays();
 
     for (let range of testRanges) {
       const fromAgeInDays = convertToDays({
@@ -240,25 +207,19 @@ const bioGroupResult = asyncHandler(async (req, res) => {
         day: range.ageType === "Days" ? parseInt(range.toAge, 10) : 0,
       });
 
-      console.log("Checking Range:", range);
-      console.log("From Age in Days:", fromAgeInDays);
-      console.log("To Age in Days:", toAgeInDays);
-
       if (
         totalDays >= fromAgeInDays &&
         totalDays <= toAgeInDays &&
         range.gender.trim().toLowerCase() === gender.trim().toLowerCase()
       ) {
-        console.log("Matched Range:", range.normalRanges);
         return range.normalRanges;
       }
     }
 
-    console.log("No Matching Range Found");
     return null;
   };
 
-  // Create output array with matching ranges
+  // Create output array with matching ranges and category
   const results = groupParams.groupParams.map((item) => {
     const test = tests.find(
       (testItem) => testItem._id.toString() === item.testId
@@ -270,22 +231,45 @@ const bioGroupResult = asyncHandler(async (req, res) => {
       return {
         testName: item.testName,
         testCode: item.testCode,
-        normalRanges: normalRanges || "No Matching Range Found",
+        normalRanges: normalRanges || null, // Set to null if no matching range found
+        category: test.category, // Include category from test
         serialNo: item.serialNo,
+        unit: test?.testRanges[0]?.unit,
       };
     } else {
       return {
         testName: item.testName,
         testCode: item.testCode,
-        normalRanges: "No Matching Range Found",
+        normalRanges: null, // Set to null if test not found
+        category: null,
         serialNo: item.serialNo,
       };
     }
   });
 
-  // Send results as JSON response
-  res.status(200).json(new ApiResponse(200, { data: results }));
-});
+  // Format the output as required
+  const output = results.map((result) => {
+    if (result.category === "Test") {
+      return {
+        normalRange: result.normalRanges,
+        testName: result.testName,
+        category: result.category,
+        testCode: result?.testCode,
+        serialNo: result?.serialNo,
+        unit: result?.unit,
+      };
+    } else {
+      return {
+        testName: result.testName,
+        category: result.category,
+        testCode: result?.testCode,
+        serialNo: result?.serialNo,
+      };
+    }
+  });
 
+  // Send results as JSON response
+  res.status(200).json(new ApiResponse(200, { data: output, results }));
+});
 
 export { labResult, bioGroupResult };
