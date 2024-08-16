@@ -158,8 +158,6 @@ const bioGroupResult = asyncHandler(async (req, res) => {
         bold: result?.bold,
         underline: result?.underline,
         fontSize: result?.fontSize,
-        result: "",
-        remarks: "",
       };
     }
   });
