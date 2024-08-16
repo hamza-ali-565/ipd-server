@@ -107,6 +107,8 @@ const bioGroupResult = asyncHandler(async (req, res) => {
         category: test.category, // Include category from test
         serialNo: item.serialNo,
         unit: test?.testRanges[0]?.unit,
+        min: test?.testRanges[0]?.min,
+        max: test?.testRanges[0]?.max,
         italic: item?.italic,
         bold: item?.bold,
         underline: item?.underline,
@@ -119,6 +121,10 @@ const bioGroupResult = asyncHandler(async (req, res) => {
         normalRanges: null, // Set to null if test not found
         category: null,
         serialNo: item.serialNo,
+        italic: item?.italic,
+        bold: item?.bold,
+        underline: item?.underline,
+        fontSize: item?.fontSize,
       };
     }
   });
@@ -127,16 +133,20 @@ const bioGroupResult = asyncHandler(async (req, res) => {
   const output = results.map((result) => {
     if (result.category === "Test") {
       return {
-        normalRange: result.normalRanges,
+        testRanges: result.normalRanges,
         testName: result.testName,
         category: result.category,
         testCode: result?.testCode,
         serialNo: result?.serialNo,
+        min: result?.min,
+        max: result?.max,
         unit: result?.unit,
         italic: result?.italic,
         bold: result?.bold,
         underline: result?.underline,
         fontSize: result?.fontSize,
+        result: "",
+        remarks: "",
       };
     } else {
       return {
@@ -144,12 +154,18 @@ const bioGroupResult = asyncHandler(async (req, res) => {
         category: result.category,
         testCode: result?.testCode,
         serialNo: result?.serialNo,
+        italic: result?.italic,
+        bold: result?.bold,
+        underline: result?.underline,
+        fontSize: result?.fontSize,
+        result: "",
+        remarks: "",
       };
     }
   });
 
   // Send results as JSON response
-  res.status(200).json(new ApiResponse(200, { data: output, results }));
+  res.status(200).json(new ApiResponse(200, { data: output }));
 });
 
 export { labResult, bioGroupResult };
