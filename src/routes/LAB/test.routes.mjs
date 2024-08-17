@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  getDataToEdit,
   getPushedChargesData,
   LabChargesCheck,
   LabChargesPush,
@@ -15,7 +16,7 @@ import {
   refundCreation,
   singleLabPdfPrint,
 } from "../../controllers/LABS/labBooking.controller.mjs";
-import { bioGroupResult, labResult } from "../../controllers/LABS/labResult.controller.mjs";
+import { bioGroupResult, getNewRanges, labResult } from "../../controllers/LABS/labResult.controller.mjs";
 
 const router = Router();
 
@@ -40,5 +41,10 @@ router.route("/biochemistry").get(BiochemistryTests);
 // lab result Entry
 router.route("/labResultEntry").post(labResult);
 router.route("/bioGroupRanges").post(bioGroupResult);
+
+// lab Data for Edit
+router.route("/resultEdit").get(getDataToEdit);
+router.route("/editRanges").post(getNewRanges);
+
 
 export default router;

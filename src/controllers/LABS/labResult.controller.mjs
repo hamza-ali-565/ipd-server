@@ -9,7 +9,7 @@ import moment from "moment";
 
 // post result of biochemistry
 const labResult = asyncHandler(async (req, res) => {
-  const { mrNo, labNo, resultDepart, resultData, testId } = req.body;
+  const { mrNo, labNo, resultDepart, resultData, testId, testName } = req.body;
   console.log("req.body", req.body);
 
   if (![mrNo, labNo, resultDepart, resultData, testId].every(Boolean))
@@ -22,6 +22,8 @@ const labResult = asyncHandler(async (req, res) => {
     createdUser: req?.user?.userId,
     resultDepart,
     resultData,
+    testId,
+    testName,
   });
 
   const updateTestModel = await LabBookingModel.findOneAndUpdate(
@@ -37,6 +39,7 @@ const labResult = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, { data: result }));
 });
 
+// get test ranges of groups
 const bioGroupResult = asyncHandler(async (req, res) => {
   const { age, gender, groupParams } = req.body;
 
@@ -166,4 +169,127 @@ const bioGroupResult = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, { data: output }));
 });
 
-export { labResult, bioGroupResult };
+// Update Data Api
+const getNewRanges = asyncHandler(async (req, res) => {
+  const { patientData, testData } = req?.body;
+  console.log(testData);
+  const newTestRanges = await labTestModel.find({
+    testCode: testData[0]?.testCode,
+  });
+  const data = await viewDataToEnterResult(
+    newTestRanges[0],
+    patientData,
+    testData
+  );
+  console.log("testData", data);
+});
+
+// Update Data Function
+const viewDataToEnterResult = async (data, patientData, testData) => {
+  const age =
+    patientData.length > 0
+      ? `${patientData[0]?.ageYear ? patientData[0]?.ageYear : "0"} Years ${
+          patientData[0]?.ageMonth ? patientData[0]?.ageMonth : "0"
+        } Months ${patientData[0]?.ageDay ? patientData[0]?.ageDay : "0"} Days`
+      : "";
+
+  // extact gender to get get ranges gender wise
+  let gender = patientData[0].gender;
+
+  // convert age into object
+  const parseAge = (ageString) => {
+    const regex = /(\d+)\s*Years\s*(\d+)\s*Months\s*(\d+)\s*Days/;
+    const matches = ageString.match(regex);
+
+    if (matches) {
+      return {
+        years: parseInt(matches[1], 10),
+        months: parseInt(matches[2], 10),
+        days: parseInt(matches[3], 10),
+      };
+    }
+
+    return null; // or handle the error as you like
+  };
+
+  //  converted age
+  const givenAge = parseAge(age);
+  console.log("data:", data?.testName);
+
+  // if (data.groupParams.length > 0) {
+  //   getGroupData(givenAge, gender, data);
+  //   return;
+  // }
+
+  // Convert given age to days for comparison
+  const totalDays = moment
+    .duration({
+      years: givenAge.years,
+      months: givenAge.months,
+      days: givenAge.days,
+    })
+    .asDays();
+
+  // extract normal ranges from data
+  let normalRanges = [];
+  if (data.groupParams.length <= 0) {
+    normalRanges = data?.testRanges;
+    console.log(normalRanges);
+  }
+
+  // Function to convert age range to days
+  const convertToDays = (age, ageType) => {
+    switch (ageType) {
+      case "Days":
+        return age;
+      case "Months":
+        return moment.duration(age, "months").asDays();
+      case "Years":
+        return moment.duration(age, "years").asDays();
+      default:
+        return 0;
+    }
+  };
+
+  // Find matching range
+  const matchingRange = normalRanges.find((range) => {
+    const fromAgeInDays = convertToDays(range.fromAge, range.ageType);
+    const toAgeInDays = convertToDays(range.toAge, range.ageType);
+    return (
+      totalDays >= fromAgeInDays &&
+      totalDays <= toAgeInDays &&
+      range.gender.toLowerCase() === gender.toLowerCase()
+    );
+  });
+  let enrichedMatchingRange;
+
+  if (matchingRange) {
+    // Directly modifying the existing object
+    matchingRange.newField = "New Value";
+
+    // Alternatively, you can create a new object by merging the original with additional data
+    enrichedMatchingRange = {
+      ...matchingRange,
+      result: testData[0]?.result,
+      testCode: testData[0]?.testCode,
+      testName: testData[0]?.testName,
+      remarks: testData[0]?.remarks,
+      newField2: "Value2",
+    };
+
+    console.log("enrichedMatchingRange", enrichedMatchingRange);
+  }
+
+  const newData = [
+    {
+      testRanges: enrichedMatchingRange ? enrichedMatchingRange : {},
+      testCode: data.testCode,
+      testName: data?.testName,
+      testId: data._id,
+    },
+  ];
+  return newData;
+  // console.log("Matching Range:", testMatchedRange);
+};
+
+export { labResult, bioGroupResult, getNewRanges };

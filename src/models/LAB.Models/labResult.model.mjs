@@ -10,6 +10,8 @@ const labResult = new Schema({
   resultData: { type: Array, required: true },
   updatedUser: { type: String },
   updatedDate: { type: String },
+  testName: { type: String, required: true },
+  testId: { type: String, required: true },
 });
 
 export const labResultModel = model("LabResult", labResult);

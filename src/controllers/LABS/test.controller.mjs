@@ -4,6 +4,9 @@ import { ApiResponse } from "../../utils/ApiResponse.mjs";
 import { labTestModel } from "../../models/LAB.Models/test.model.mjs";
 import { getCreatedOn } from "../../constants.mjs";
 import { LabChargesModel } from "../../models/LAB.Models/labCharges.model.mjs";
+import { labResultModel } from "../../models/LAB.Models/labResult.model.mjs";
+import { PatientRegModel } from "../../../DBRepo/IPD/PatientModel/PatientRegModel.mjs";
+import { LabBookingModel } from "../../models/LAB.Models/LabBooking.model.mjs";
 
 // create lab code
 const labTest = asyncHandler(async (req, res) => {
@@ -290,10 +293,22 @@ const getPushedChargesData = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, { data: filterData }));
 });
 
+// get data to edit //
+const getDataToEdit = asyncHandler(async (req, res) => {
+  const { labNo } = req?.query;
+  if (!labNo) throw new ApiError(400, "LAB NO IS REQUIRED !!!");
+  const response = await labResultModel.find({ labNo });
+  if(response.length<=0) throw new ApiError (401, "DO DATA FOUND !!!")
+  const patientData = await PatientRegModel.find({MrNo: response[0]?.mrNo})
+  const labData = await LabBookingModel.find({labNo})
+
+  return res.status(200).json(new ApiResponse(200, { data: response, patientData, labCDetails:labData }));
+});
 export {
   labTest,
   LabTestToUpdate,
   LabChargesCheck,
   LabChargesPush,
   getPushedChargesData,
+  getDataToEdit
 };
