@@ -103,7 +103,12 @@ const bioGroupResult = asyncHandler(async (req, res) => {
         totalDays <= toAgeInDays &&
         range.gender.trim().toLowerCase() === gender.trim().toLowerCase()
       ) {
-        return range.normalRanges;
+        return {
+          ranges: range.normalRanges,
+          min: range?.min,
+          max: range?.max,
+          unit: range?.unit,
+        };
       }
     }
 
@@ -118,16 +123,17 @@ const bioGroupResult = asyncHandler(async (req, res) => {
 
     if (test) {
       const normalRanges = findMatchingRange(test.testRanges, age, gender);
+      // console.log();
 
       return {
         testName: item.testName,
         testCode: item.testCode,
-        normalRanges: normalRanges || null, // Set to null if no matching range found
+        normalRanges: normalRanges?.ranges || null, // Set to null if no matching range found
         category: test.category, // Include category from test
         serialNo: item.serialNo,
-        unit: test?.testRanges[0]?.unit,
-        min: test?.testRanges[0]?.min,
-        max: test?.testRanges[0]?.max,
+        unit: normalRanges?.unit,
+        min: normalRanges?.min,
+        max: normalRanges?.max,
         italic: item?.italic,
         bold: item?.bold,
         underline: item?.underline,
@@ -187,11 +193,11 @@ const bioGroupResult = asyncHandler(async (req, res) => {
 
 // Update Data Api
 const getNewRanges = asyncHandler(async (req, res) => {
-  const { patientData, testData } = req?.body;
-  console.log(testData);
+  const { patientData, testData, testId } = req?.body;
   const newTestRanges = await labTestModel.find({
-    testCode: testData[0]?.testCode,
+    _id: testId,
   });
+  console.log("newTestRanges ", testData);
   const data = await viewDataToEnterResult(
     newTestRanges[0],
     patientData,
@@ -201,7 +207,7 @@ const getNewRanges = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, { data }));
 });
 
-// Update Data Function
+// Update Test Data Function
 const viewDataToEnterResult = async (data, patientData, testData) => {
   const age =
     patientData.length > 0
@@ -233,10 +239,12 @@ const viewDataToEnterResult = async (data, patientData, testData) => {
   const givenAge = parseAge(age);
   console.log("data:", data?.testName);
 
-  // if (data.groupParams.length > 0) {
-  //   getGroupData(givenAge, gender, data);
-  //   return;
-  // }
+  if (data.groupParams.length > 0) {
+    const dataDetails = await getGroupData(givenAge, gender, data);
+    console.log("Data ", data);
+
+    return dataDetails;
+  }
 
   // Convert given age to days for comparison
   const totalDays = moment
@@ -294,6 +302,100 @@ const viewDataToEnterResult = async (data, patientData, testData) => {
   const data432 = [enrichedMatchingRange];
   return data432;
   // console.log("Matching Range:", testMatchedRange);
+};
+
+//Update  group Data Function
+const getGroupData = async (age, gender, groupParams) => {
+  // Extract test IDs from groupParams
+  const testIds = groupParams.groupParams.map((item) => item.testId);
+  console.log("gender ", gender);
+
+  // Fetch tests with matching IDs
+  const tests = await labTestModel
+    .find({ _id: { $in: testIds } })
+    .select("testRanges category testCode");
+
+  console.log("Retrieved test ranges:", tests);
+
+  // Helper function to convert age to days for comparison
+  const convertToDays = ({ year, month, day }) => {
+    return moment.duration({ years: year, months: month, days: day }).asDays();
+  };
+
+  // Function to find a matching range based on age and gender
+  const findMatchingRange = (testRanges, age, gender) => {
+    const totalDays = moment
+      .duration({
+        years: age.years,
+        months: age.months,
+        days: age.days,
+      })
+      .asDays();
+
+    for (let range of testRanges) {
+      const fromAgeInDays = convertToDays({
+        year: range.ageType === "Years" ? parseInt(range.fromAge, 10) : 0,
+        month: range.ageType === "Months" ? parseInt(range.fromAge, 10) : 0,
+        day: range.ageType === "Days" ? parseInt(range.fromAge, 10) : 0,
+      });
+      const toAgeInDays = convertToDays({
+        year: range.ageType === "Years" ? parseInt(range.toAge, 10) : 0,
+        month: range.ageType === "Months" ? parseInt(range.toAge, 10) : 0,
+        day: range.ageType === "Days" ? parseInt(range.toAge, 10) : 0,
+      });
+
+      if (
+        totalDays >= fromAgeInDays &&
+        totalDays <= toAgeInDays &&
+        range.gender.trim().toLowerCase() === gender.trim().toLowerCase()
+      ) {
+        return range.normalRanges;
+      }
+    }
+
+    return null;
+  };
+
+  // Create output array with matching ranges and category
+  const results = groupParams.groupParams.map((item) => {
+    const test = tests.find(
+      (testItem) => testItem._id.toString() === item.testId
+    );
+
+    if (test) {
+      const normalRanges = findMatchingRange(test.testRanges, age, gender);
+
+      return {
+        testName: item.testName,
+        testCode: item.testCode,
+        normalRanges: normalRanges || null, // Set to null if no matching range found
+        category: test.category, // Include category from test
+        serialNo: item.serialNo,
+        unit: test?.testRanges[0]?.unit,
+        min: test?.testRanges[0]?.min,
+        max: test?.testRanges[0]?.max,
+        italic: item?.italic,
+        bold: item?.bold,
+        underline: item?.underline,
+        fontSize: item?.fontSize,
+      };
+    } else {
+      return {
+        testName: item.testName,
+        testCode: item.testCode,
+        normalRanges: null, // Set to null if test not found
+        category: null,
+        serialNo: item.serialNo,
+        italic: item?.italic,
+        bold: item?.bold,
+        underline: item?.underline,
+        fontSize: item?.fontSize,
+      };
+    }
+  });
+
+  console.log("Result ", results);
+  return results;
 };
 
 export { labResult, bioGroupResult, getNewRanges, updateLabResult };
