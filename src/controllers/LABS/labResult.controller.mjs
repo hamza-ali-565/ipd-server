@@ -349,7 +349,12 @@ const getGroupData = async (age, gender, groupParams) => {
         totalDays <= toAgeInDays &&
         range.gender.trim().toLowerCase() === gender.trim().toLowerCase()
       ) {
-        return range.normalRanges;
+        return {
+          ranges: range.normalRanges,
+          min: range?.min,
+          max: range?.max,
+          unit: range?.unit,
+        };
       }
     }
 
@@ -368,12 +373,12 @@ const getGroupData = async (age, gender, groupParams) => {
       return {
         testName: item.testName,
         testCode: item.testCode,
-        normalRanges: normalRanges || null, // Set to null if no matching range found
+        normalRanges: normalRanges?.ranges || null, // Set to null if no matching range found
         category: test.category, // Include category from test
         serialNo: item.serialNo,
-        unit: test?.testRanges[0]?.unit,
-        min: test?.testRanges[0]?.min,
-        max: test?.testRanges[0]?.max,
+        unit: normalRanges?.unit,
+        min: normalRanges?.min,
+        max: normalRanges?.max,
         italic: item?.italic,
         bold: item?.bold,
         underline: item?.underline,
