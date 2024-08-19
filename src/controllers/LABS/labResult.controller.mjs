@@ -53,7 +53,7 @@ const updateLabResult = asyncHandler(async (req, res) => {
     { new: true }
   );
   if (!updateResult) throw new ApiError(401, "PLEASE TRY LATER");
-  return res.status(200).json(new ApiResponse(200, { data: updateLabResult }));
+  return res.status(200).json(new ApiResponse(200, { data: updateResult }));
 });
 // get test ranges of groups
 const bioGroupResult = asyncHandler(async (req, res) => {
