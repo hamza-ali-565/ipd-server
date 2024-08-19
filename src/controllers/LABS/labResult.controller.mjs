@@ -6,6 +6,7 @@ import { LabChargesModel } from "../../models/LAB.Models/labCharges.model.mjs";
 import { LabBookingModel } from "../../models/LAB.Models/LabBooking.model.mjs";
 import { labTestModel } from "../../models/LAB.Models/test.model.mjs";
 import moment from "moment";
+import { getCreatedOn } from "../../constants.mjs";
 
 // post result of biochemistry
 const labResult = asyncHandler(async (req, res) => {
@@ -39,6 +40,21 @@ const labResult = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, { data: result }));
 });
 
+// Edit update of test Result
+const updateLabResult = asyncHandler(async (req, res) => {
+  const { labNo, _id, resultData } = req.body;
+  console.log({ labNo, _id, resultData });
+
+  if (!labNo || !_id || !resultData)
+    throw new ApiError(400, "ALL PARAMETERS ARE REQUIRED");
+  const updateResult = await labResultModel.findOneAndUpdate(
+    { labNo, _id },
+    { resultData, updatedUser: req?.user?.userId, updatedOn: getCreatedOn() },
+    { new: true }
+  );
+  if (!updateResult) throw new ApiError(401, "PLEASE TRY LATER");
+  return res.status(200).json(new ApiResponse(200, { data: updateLabResult }));
+});
 // get test ranges of groups
 const bioGroupResult = asyncHandler(async (req, res) => {
   const { age, gender, groupParams } = req.body;
@@ -182,6 +198,7 @@ const getNewRanges = asyncHandler(async (req, res) => {
     testData
   );
   console.log("testData", data);
+  return res.status(200).json(new ApiResponse(200, { data }));
 });
 
 // Update Data Function
@@ -234,7 +251,6 @@ const viewDataToEnterResult = async (data, patientData, testData) => {
   let normalRanges = [];
   if (data.groupParams.length <= 0) {
     normalRanges = data?.testRanges;
-    console.log(normalRanges);
   }
 
   // Function to convert age range to days
@@ -265,7 +281,6 @@ const viewDataToEnterResult = async (data, patientData, testData) => {
 
   if (matchingRange) {
     // Directly modifying the existing object
-    matchingRange.newField = "New Value";
 
     // Alternatively, you can create a new object by merging the original with additional data
     enrichedMatchingRange = {
@@ -274,22 +289,11 @@ const viewDataToEnterResult = async (data, patientData, testData) => {
       testCode: testData[0]?.testCode,
       testName: testData[0]?.testName,
       remarks: testData[0]?.remarks,
-      newField2: "Value2",
     };
-
-    console.log("enrichedMatchingRange", enrichedMatchingRange);
   }
-
-  const newData = [
-    {
-      testRanges: enrichedMatchingRange ? enrichedMatchingRange : {},
-      testCode: data.testCode,
-      testName: data?.testName,
-      testId: data._id,
-    },
-  ];
-  return newData;
+  const data432 = [enrichedMatchingRange];
+  return data432;
   // console.log("Matching Range:", testMatchedRange);
 };
 
-export { labResult, bioGroupResult, getNewRanges };
+export { labResult, bioGroupResult, getNewRanges, updateLabResult };
