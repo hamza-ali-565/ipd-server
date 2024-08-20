@@ -1,64 +1,138 @@
-// useTransition in react
-
-// i will provide all details i want output like i have mention
-
-const age = {
-  year: 10,
-  month: 1,
-  day: 22,
-};
-
-const gender = "Male";
-
-const group = [
+const newTestRanges = [
   {
-    bold: false,
-    category: "Test",
-    fontSize: "8px",
-    italic: false,
-    serialNo: 1,
+    testRanges: 'male range',
+    testName: 'LFT',
+    category: 'Test',
     testCode: 1,
-    testId: "66ad0428022e1a28e99415c2",
-    testName: "CBC ESR",
-    underline: false,
-  },
-  {
-    bold: false,
-    category: "Heading",
-    fontSize: "8px",
+    serialNo: 1,
+    min: '12',
+    max: '12',
+    unit: '$$$$$$$$',
     italic: false,
+    bold: true,
+    underline: true,
+    fontSize: '8px',
+    result: 'semen',
+    remarks: 'gmen'
+  },
+  {
+    testName: 'NEUTROPHILS',
+    category: 'Heading',
+    testCode: 10,
     serialNo: 2,
-    testCode: 2,
-    testId: "66ad045d213c9856db89f06a",
-    testName: "L.F.T",
+    italic: true,
+    bold: true,
+    underline: true,
+    fontSize: '10px'
+  },
+  {
+    testRanges: '26 - 30',
+    testName: 'CBC ESR',
+    category: 'Test',
+    testCode: 3,
+    serialNo: 3,
+    min: '1',
+    max: '12',
+    unit: '%',
+    italic: false,
+    bold: true,
+    underline: true,
+    fontSize: '8px',
+    result: 'Cetto',
+    remarks: 'bettto'
+  },
+  {
+    testName: 'LYMPHOCYTES',
+    category: 'Heading',
+    testCode: 11,
+    serialNo: 4,
+    italic: true,
+    bold: true,
     underline: false,
+    fontSize: '12px'
   },
-];
-
-const LFT = [
   {
-    _id: "66ad045d213c9856db89f06a",
-    testRanges: [
-      { fromAge: 5, toAge: 20, ageType: "Year", normalRanges: "go" },
-      { fromAge: 5, toAge: 20, ageType: "Month", normalRanges: "goa" },
-      { fromAge: 5, toAge: 20, ageType: "Day", normalRanges: "gone" },
-    ],
-  },
-];
+    testName: 'PFT',
+    category: 'Heading',
+    testCode: 2,
+    serialNo: 5,
+    italic: true,
+    bold: true,
+    underline: false,
+    fontSize: '10px'
+  }
+]
 
-const CBC_ESR = [
+
+const Result = [
   {
-    _id: "66ad0428022e1a28e99415c2",
-    testRanges: [
-      { fromAge: 5, toAge: 20, ageType: "Year", normalRanges: "Alpha" },
-      { fromAge: 5, toAge: 20, ageType: "Month", normalRanges: "Beta" },
-      { fromAge: 5, toAge: 20, ageType: "Day", normalRanges: "gamma" },
-    ],
+    testName: 'LFT',
+    testCode: 1,
+    normalRanges: 'mallla',
+    category: 'Test',
+    serialNo: 1,
+    unit: '....................',
+    min: '12',
+    max: '30',
+    italic: false,
+    bold: true,
+    underline: true,
+    fontSize: '8px'
   },
-];
-
-
-const output = [
-    {testName: "CBC_ESR", testCode:1, normalRanges: "Alpha"},
-    {testName: "L.F.T", testCode:2, normalRanges: "go"},
+  {
+    testName: 'NEUTROPHILS',
+    testCode: 10,
+    normalRanges: null,
+    category: 'Heading',
+    serialNo: 2,
+    unit: undefined,
+    min: undefined,
+    max: undefined,
+    italic: true,
+    bold: true,
+    underline: true,
+    fontSize: '10px'
+  },
+  {
+    testName: 'CBC ESR',
+    testCode: 3,
+    normalRanges: '56 89 89',
+    category: 'Test',
+    serialNo: 3,
+    unit: '{{{{{{{{{{------------}}}}}}}}}',
+    min: '365',
+    max: '231',
+    italic: false,
+    bold: true,
+    underline: true,
+    fontSize: '8px'
+  },
+  {
+    testName: 'LYMPHOCYTES',
+    testCode: 11,
+    normalRanges: null,
+    category: 'Heading',
+    serialNo: 4,
+    unit: undefined,
+    min: undefined,
+    max: undefined,
+    italic: true,
+    bold: true,
+    underline: false,
+    fontSize: '12px'
+  },
+  {
+    testName: 'PFT',
+    testCode: 2,
+    normalRanges: null,
+    category: 'Heading',
+    serialNo: 5,
+    unit: undefined,
+    min: undefined,
+    max: undefined,
+    italic: true,
+    bold: true,
+    underline: false,
+    fontSize: '10px'
+  }
 ]

@@ -203,7 +203,6 @@ const getNewRanges = asyncHandler(async (req, res) => {
     patientData,
     testData
   );
-  console.log("testData", data);
   return res.status(200).json(new ApiResponse(200, { data }));
 });
 
@@ -237,11 +236,9 @@ const viewDataToEnterResult = async (data, patientData, testData) => {
 
   //  converted age
   const givenAge = parseAge(age);
-  console.log("data:", data?.testName);
 
   if (data.groupParams.length > 0) {
-    const dataDetails = await getGroupData(givenAge, gender, data);
-    console.log("Data ", data);
+    const dataDetails = await getGroupData(givenAge, gender, data, testData);
 
     return dataDetails;
   }
@@ -305,17 +302,15 @@ const viewDataToEnterResult = async (data, patientData, testData) => {
 };
 
 //Update  group Data Function
-const getGroupData = async (age, gender, groupParams) => {
+const getGroupData = async (age, gender, groupParams, testData) => {
   // Extract test IDs from groupParams
   const testIds = groupParams.groupParams.map((item) => item.testId);
-  console.log("gender ", gender);
 
   // Fetch tests with matching IDs
   const tests = await labTestModel
     .find({ _id: { $in: testIds } })
     .select("testRanges category testCode");
 
-  console.log("Retrieved test ranges:", tests);
 
   // Helper function to convert age to days for comparison
   const convertToDays = ({ year, month, day }) => {
@@ -399,7 +394,17 @@ const getGroupData = async (age, gender, groupParams) => {
     }
   });
 
-  console.log("Result ", results);
+
+  results.forEach((items) => {
+    const matchItems = testData.find(
+      (newItems) => newItems?.testCode === items?.testCode
+    );
+    if (matchItems) {
+      items.result = matchItems?.result || items?.result;
+      items.remarks = matchItems?.remarks || items?.remarks;
+    }
+  });
+
   return results;
 };
 
