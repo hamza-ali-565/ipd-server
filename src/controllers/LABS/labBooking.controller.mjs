@@ -350,7 +350,6 @@ const refundCreation = asyncHandler(async (req, res) => {
 });
 
 // getting test for biochemistry
-
 const BiochemistryTests = asyncHandler(async (req, res) => {
   const { labNo, department } = req.query;
   if (!labNo || !department) throw new ApiError(401, "LAB NO IS REQUIRED !!!");
@@ -403,6 +402,7 @@ const BiochemistryTests = asyncHandler(async (req, res) => {
     })
   );
 });
+
 //exports
 export {
   LabBookingCreator,
