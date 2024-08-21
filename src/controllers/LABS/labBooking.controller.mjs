@@ -352,8 +352,9 @@ const refundCreation = asyncHandler(async (req, res) => {
 // getting test for biochemistry
 
 const BiochemistryTests = asyncHandler(async (req, res) => {
-  const { labNo } = req.query;
-  if (!labNo) throw new ApiError(401, "LAB NO IS REQUIRED !!!");
+  const { labNo, department } = req.query;
+  if (!labNo || !department) throw new ApiError(401, "LAB NO IS REQUIRED !!!");
+  console.log("department ", department);
 
   // get registered lab
   const labData = await LabBookingModel.find({ labNo });
@@ -378,12 +379,12 @@ const BiochemistryTests = asyncHandler(async (req, res) => {
     throw new ApiError(401, "ALL RESULTS ARE ENTERED !!!");
 
   // extract undeleted ids
-  let ids =  filterResutledLabs.map((items) => items?.testId);
+  let ids = filterResutledLabs.map((items) => items?.testId);
 
   // find test / group details of undeleted ids
   const BioIds = await labTestModel.find({ _id: { $in: ids } });
   const filterBioTests = BioIds.filter(
-    (items) => items?.department === "Biochemistry"
+    (items) => items?.department === department
   );
 
   if (filterBioTests.length <= 0) {
