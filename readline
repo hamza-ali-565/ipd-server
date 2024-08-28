@@ -136,3 +136,5 @@ const Result = [
     fontSize: '10px'
   }
 ]
+
+/// call data from 'lab/resultEdit'

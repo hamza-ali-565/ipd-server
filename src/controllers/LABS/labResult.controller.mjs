@@ -7,6 +7,7 @@ import { LabBookingModel } from "../../models/LAB.Models/LabBooking.model.mjs";
 import { labTestModel } from "../../models/LAB.Models/test.model.mjs";
 import moment from "moment";
 import { getCreatedOn } from "../../constants.mjs";
+import { PatientRegModel } from "../../../DBRepo/IPD/PatientModel/PatientRegModel.mjs";
 
 // post result of biochemistry
 const labResult = asyncHandler(async (req, res) => {
@@ -38,6 +39,18 @@ const labResult = asyncHandler(async (req, res) => {
     { new: true }
   );
   return res.status(200).json(new ApiResponse(200, { data: result }));
+});
+
+// get data to edit //
+const getDataToEdit = asyncHandler(async (req, res) => {
+  const { labNo } = req?.query;
+  if (!labNo) throw new ApiError(400, "LAB NO IS REQUIRED !!!");
+  const response = await labResultModel.find({ labNo });
+  if(response.length<=0) throw new ApiError (401, "DO DATA FOUND !!!")
+  const patientData = await PatientRegModel.find({MrNo: response[0]?.mrNo})
+  const labData = await LabBookingModel.find({labNo})
+
+  return res.status(200).json(new ApiResponse(200, { data: response, patientData, labCDetails:labData }));
 });
 
 // Edit update of test Result
@@ -408,4 +421,4 @@ const getGroupData = async (age, gender, groupParams, testData) => {
   return results;
 };
 
-export { labResult, bioGroupResult, getNewRanges, updateLabResult };
+export { labResult, bioGroupResult, getNewRanges, updateLabResult, getDataToEdit };

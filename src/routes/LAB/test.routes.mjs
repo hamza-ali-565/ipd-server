@@ -1,6 +1,5 @@
 import { Router } from "express";
 import {
-  getDataToEdit,
   getPushedChargesData,
   LabChargesCheck,
   LabChargesPush,
@@ -16,7 +15,7 @@ import {
   refundCreation,
   singleLabPdfPrint,
 } from "../../controllers/LABS/labBooking.controller.mjs";
-import { bioGroupResult, getNewRanges, labResult, updateLabResult } from "../../controllers/LABS/labResult.controller.mjs";
+import { bioGroupResult, getDataToEdit, getNewRanges, labResult, updateLabResult } from "../../controllers/LABS/labResult.controller.mjs";
 
 const router = Router();
 

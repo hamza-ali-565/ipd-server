@@ -293,22 +293,11 @@ const getPushedChargesData = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, { data: filterData }));
 });
 
-// get data to edit //
-const getDataToEdit = asyncHandler(async (req, res) => {
-  const { labNo } = req?.query;
-  if (!labNo) throw new ApiError(400, "LAB NO IS REQUIRED !!!");
-  const response = await labResultModel.find({ labNo });
-  if(response.length<=0) throw new ApiError (401, "DO DATA FOUND !!!")
-  const patientData = await PatientRegModel.find({MrNo: response[0]?.mrNo})
-  const labData = await LabBookingModel.find({labNo})
 
-  return res.status(200).json(new ApiResponse(200, { data: response, patientData, labCDetails:labData }));
-});
 export {
   labTest,
   LabTestToUpdate,
   LabChargesCheck,
   LabChargesPush,
   getPushedChargesData,
-  getDataToEdit
 };
