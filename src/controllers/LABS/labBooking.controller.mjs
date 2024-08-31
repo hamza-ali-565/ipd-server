@@ -386,6 +386,9 @@ const BiochemistryTests = asyncHandler(async (req, res) => {
     (items) => items?.department === department
   );
 
+console.log("BIO IDS ", BioIds);
+
+
   if (filterBioTests.length <= 0) {
     throw new ApiError(400, `NO TEST FOR BIOCHEMISTRY !!!`);
   }

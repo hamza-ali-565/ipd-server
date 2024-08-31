@@ -8,6 +8,7 @@ import { labTestModel } from "../../models/LAB.Models/test.model.mjs";
 import moment from "moment";
 import { getCreatedOn } from "../../constants.mjs";
 import { PatientRegModel } from "../../../DBRepo/IPD/PatientModel/PatientRegModel.mjs";
+import { SpecimenModel } from "../../models/LAB.Models/Specimen.model.mjs";
 
 // post result of biochemistry
 const labResult = asyncHandler(async (req, res) => {
@@ -46,11 +47,17 @@ const getDataToEdit = asyncHandler(async (req, res) => {
   const { labNo } = req?.query;
   if (!labNo) throw new ApiError(400, "LAB NO IS REQUIRED !!!");
   const response = await labResultModel.find({ labNo });
-  if(response.length<=0) throw new ApiError (401, "DO DATA FOUND !!!")
-  const patientData = await PatientRegModel.find({MrNo: response[0]?.mrNo})
-  const labData = await LabBookingModel.find({labNo})
+  if (response.length <= 0) throw new ApiError(401, "DO DATA FOUND !!!");
+  const patientData = await PatientRegModel.find({ MrNo: response[0]?.mrNo });
+  const labData = await LabBookingModel.find({ labNo });
 
-  return res.status(200).json(new ApiResponse(200, { data: response, patientData, labCDetails:labData }));
+  return res.status(200).json(
+    new ApiResponse(200, {
+      data: response,
+      patientData,
+      labCDetails: labData,
+    })
+  );
 });
 
 // Edit update of test Result
@@ -324,7 +331,6 @@ const getGroupData = async (age, gender, groupParams, testData) => {
     .find({ _id: { $in: testIds } })
     .select("testRanges category testCode");
 
-
   // Helper function to convert age to days for comparison
   const convertToDays = ({ year, month, day }) => {
     return moment.duration({ years: year, months: month, days: day }).asDays();
@@ -407,7 +413,6 @@ const getGroupData = async (age, gender, groupParams, testData) => {
     }
   });
 
-
   results.forEach((items) => {
     const matchItems = testData.find(
       (newItems) => newItems?.testCode === items?.testCode
@@ -421,4 +426,35 @@ const getGroupData = async (age, gender, groupParams, testData) => {
   return results;
 };
 
-export { labResult, bioGroupResult, getNewRanges, updateLabResult, getDataToEdit };
+// create Specimen
+const LabSpecimen = asyncHandler(async (req, res) => {
+  const { specimen, type } = req.body;
+  if (![specimen].every(Boolean))
+    throw new ApiError(400, "ALL PARAMETERS ARE REQUIRED !!!");
+  const specimenData = specimen.trim();
+  const response = await SpecimenModel.create({
+    specimen: specimenData,
+    type,
+    createdUser: req?.user?.userId,
+  });
+  if (!response)
+    throw new ApiError(401, "DATA CREATION FAILED PLEASE TRY LATER");
+  res.status(200).json(new ApiResponse(200, { data: response }));
+});
+
+// get specimen
+const labSpecimenDisp = asyncHandler(async (req, res) => {
+  const { type } = req?.query;
+  const response = await SpecimenModel.find({ type });
+  if (response.length <= 0) throw new ApiError(404, "NO DATA FOUND !!!");
+  res.status(200).json(new ApiResponse(200, { data: response }));
+});
+export {
+  labResult,
+  bioGroupResult,
+  getNewRanges,
+  updateLabResult,
+  getDataToEdit,
+  LabSpecimen,
+  labSpecimenDisp,
+};

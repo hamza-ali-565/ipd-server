@@ -15,7 +15,15 @@ import {
   refundCreation,
   singleLabPdfPrint,
 } from "../../controllers/LABS/labBooking.controller.mjs";
-import { bioGroupResult, getDataToEdit, getNewRanges, labResult, updateLabResult } from "../../controllers/LABS/labResult.controller.mjs";
+import {
+  bioGroupResult,
+  getDataToEdit,
+  getNewRanges,
+  labResult,
+  LabSpecimen,
+  labSpecimenDisp,
+  updateLabResult,
+} from "../../controllers/LABS/labResult.controller.mjs";
 
 const router = Router();
 
@@ -25,7 +33,8 @@ router.route("/tests").get(LabTestToUpdate);
 router.route("/testsCharges").get(LabChargesCheck);
 router.route("/testsChargesPush").post(LabChargesPush);
 router.route("/labsForBooking").get(getPushedChargesData);
-
+router.route("/labSpecimen").post(LabSpecimen);
+router.route("/labSpecimenDisp").get(labSpecimenDisp);
 // Lab Booking Related
 router.route("/labBooking").post(LabBookingCreator);
 router.route("/labBooking").get(PrevLabs);
@@ -46,7 +55,5 @@ router.route("/resultEdit").get(getDataToEdit);
 router.route("/editRanges").post(getNewRanges);
 // lab Update
 router.route("/resultUpdate").post(updateLabResult);
-
-
 
 export default router;
