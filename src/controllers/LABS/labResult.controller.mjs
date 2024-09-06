@@ -495,8 +495,12 @@ const microscopyData = asyncHandler(async (req, res) => {
 // Parent wise child data
 const getChildData = asyncHandler(async (req, res) => {
   const { _id } = req.query;
+  console.log("_id", _id);
+  
   if (!_id) throw new ApiError(400, "PARENT DATA IS REQUIRED !!!");
-  const response = await MicroscopyDataModel.find({ _id }).select("childData");
+  const response = await MicroscopyDataModel.find({ _id });
+  console.log("response ", response);
+  
   if (response[0]?.childData.length <= 0)
     throw new ApiError(404, "DATA NOT FOUND!!!");
   return res.status(200).json(new ApiResponse(200, { data: response }));
