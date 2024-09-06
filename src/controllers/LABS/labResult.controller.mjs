@@ -9,6 +9,7 @@ import moment from "moment";
 import { getCreatedOn } from "../../constants.mjs";
 import { PatientRegModel } from "../../../DBRepo/IPD/PatientModel/PatientRegModel.mjs";
 import { SpecimenModel } from "../../models/LAB.Models/Specimen.model.mjs";
+import { MicroscopyDataModel } from "../../models/LAB.Models/MicroscopyData.model.mjs";
 
 // post result of biochemistry
 const labResult = asyncHandler(async (req, res) => {
@@ -449,6 +450,57 @@ const labSpecimenDisp = asyncHandler(async (req, res) => {
   if (response.length <= 0) throw new ApiError(404, "NO DATA FOUND !!!");
   res.status(200).json(new ApiResponse(200, { data: response }));
 });
+
+// Microscopy Parent
+const microscopyParent = asyncHandler(async (req, res) => {
+  const { parentName } = req.body;
+
+  if (![parentName].every(Boolean))
+    throw new Error(400, "ALL PARAMETERS ARE REQUIRED !!!");
+
+  const response = await MicroscopyDataModel.create({
+    parentName,
+  });
+
+  return res.status(200).send(new ApiResponse(200, { data: response }));
+});
+
+// All Parents Microscopy
+const MicroDataParentForw = asyncHandler(async (req, res) => {
+  const response = await MicroscopyDataModel.find({}).select("parentName");
+  if (response.length <= 0) throw new ApiError(404, "DATA NOT FOUND !!!");
+  return res.status(200).send(new ApiResponse(200, { data: response }));
+});
+// Microscopy Data
+const microscopyData = asyncHandler(async (req, res) => {
+  const { parentName, childData } = req.body;
+
+  if (![parentName, childData].every(Boolean))
+    throw new Error(400, "ALL PARAMETERS ARE REQUIRED !!!");
+
+  childData?.map((items, index) => {
+    if (!items?.name)
+      throw new ApiError(`Some Data missed at line no. ${index + 1}`);
+    return;
+  });
+
+  const response = await MicroscopyDataModel.create({
+    childData,
+    parentName,
+    lastUpdateOn: getCreatedOn(),
+  });
+
+  return res.status(200).send(new ApiResponse(200, { data: response }));
+});
+// Parent wise child data
+const getChildData = asyncHandler(async (req, res) => {
+  const { _id } = req.query;
+  if (!_id) throw new ApiError(400, "PARENT DATA IS REQUIRED !!!");
+  const response = await MicroscopyDataModel.find({ _id }).select("childData");
+  if (response[0]?.childData.length <= 0)
+    throw new ApiError(404, "DATA NOT FOUND!!!");
+  return res.status(200).json(new ApiResponse(200, { data: response }));
+});
 export {
   labResult,
   bioGroupResult,
@@ -457,4 +509,8 @@ export {
   getDataToEdit,
   LabSpecimen,
   labSpecimenDisp,
+  microscopyData,
+  microscopyParent,
+  MicroDataParentForw,
+  getChildData,
 };

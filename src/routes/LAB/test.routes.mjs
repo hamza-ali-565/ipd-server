@@ -17,11 +17,15 @@ import {
 } from "../../controllers/LABS/labBooking.controller.mjs";
 import {
   bioGroupResult,
+  getChildData,
   getDataToEdit,
   getNewRanges,
   labResult,
   LabSpecimen,
   labSpecimenDisp,
+  MicroDataParentForw,
+  microscopyData,
+  microscopyParent,
   updateLabResult,
 } from "../../controllers/LABS/labResult.controller.mjs";
 
@@ -35,6 +39,11 @@ router.route("/testsChargesPush").post(LabChargesPush);
 router.route("/labsForBooking").get(getPushedChargesData);
 router.route("/labSpecimen").post(LabSpecimen);
 router.route("/labSpecimenDisp").get(labSpecimenDisp);
+router.route("/labMicroData").post(microscopyData);
+router.route("/labMicroDataParent").post(microscopyParent);
+router.route("/labMicroData").get(MicroDataParentForw);
+router.route("/labMicroDataChild").get(getChildData);
+
 // Lab Booking Related
 router.route("/labBooking").post(LabBookingCreator);
 router.route("/labBooking").get(PrevLabs);
