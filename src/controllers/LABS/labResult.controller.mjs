@@ -484,7 +484,7 @@ const microscopyData = asyncHandler(async (req, res) => {
     return;
   });
   console.log("childdata ", childData);
-  let newData= []
+  let newData = [];
   const getbackData = await MicroscopyDataModel.find({ _id });
   console.log("get back data ", getbackData[0].childData);
   if (getbackData[0].childData?.length > 0) {
@@ -496,7 +496,7 @@ const microscopyData = asyncHandler(async (req, res) => {
     { _id },
     {
       $set: {
-        childData: newData?.length <= 0 ? childData : newData,
+        childData: (newData.length <= 0 && childData) || newData,
         lastUpdateOn: getCreatedOn(),
       },
     },
