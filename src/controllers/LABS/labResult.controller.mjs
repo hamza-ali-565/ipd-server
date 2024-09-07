@@ -473,7 +473,7 @@ const MicroDataParentForw = asyncHandler(async (req, res) => {
 });
 // Microscopy Data
 const microscopyData = asyncHandler(async (req, res) => {
-  const { parentName, childData } = req.body;
+  const { parentName, childData, _id } = req.body;
 
   if (![parentName, childData].every(Boolean))
     throw new Error(400, "ALL PARAMETERS ARE REQUIRED !!!");
@@ -483,12 +483,25 @@ const microscopyData = asyncHandler(async (req, res) => {
       throw new ApiError(`Some Data missed at line no. ${index + 1}`);
     return;
   });
+  console.log("childdata ", childData);
+  let newData= []
+  const getbackData = await MicroscopyDataModel.find({ _id });
+  console.log("get back data ", getbackData[0].childData);
+  if (getbackData[0].childData?.length > 0) {
+    newData = [...childData, ...getbackData[0].childData];
+  }
 
-  const response = await MicroscopyDataModel.create({
-    childData,
-    parentName,
-    lastUpdateOn: getCreatedOn(),
-  });
+  console.log("newdata ", newData);
+  const response = await MicroscopyDataModel.findOneAndUpdate(
+    { _id },
+    {
+      $set: {
+        childData: newData?.length <= 0 ? childData : newData,
+        lastUpdateOn: getCreatedOn(),
+      },
+    },
+    { new: true }
+  );
 
   return res.status(200).send(new ApiResponse(200, { data: response }));
 });
@@ -496,11 +509,11 @@ const microscopyData = asyncHandler(async (req, res) => {
 const getChildData = asyncHandler(async (req, res) => {
   const { _id } = req.query;
   console.log("_id", _id);
-  
+
   if (!_id) throw new ApiError(400, "PARENT DATA IS REQUIRED !!!");
   const response = await MicroscopyDataModel.find({ _id });
   console.log("response ", response);
-  
+
   if (response[0]?.childData.length <= 0)
     throw new ApiError(404, "DATA NOT FOUND!!!");
   return res.status(200).json(new ApiResponse(200, { data: response }));
