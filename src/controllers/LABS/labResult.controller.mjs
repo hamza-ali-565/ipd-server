@@ -541,6 +541,26 @@ const allDataWithChild = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, { data: response }));
 });
 
+const MicrobiologyData = asyncHandler(async (req, res) => {
+  const {
+    mrNo,
+    labNo,
+    createdUser,
+    resultDepart,
+    testName,
+    testId,
+    microscopy,
+    culture,
+    gramStain,
+    organism,
+    MicroscopicData,
+    remarks,
+    result,
+  } = req.body;
+  if (![mrNo, labNo, testName, testId].every(Boolean))
+    throw new ApiError(404, "ALL PARAMETERS ARE REQUIRED !!!");
+});
+
 export {
   labResult,
   bioGroupResult,
