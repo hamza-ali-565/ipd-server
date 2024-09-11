@@ -16,6 +16,7 @@ import {
   singleLabPdfPrint,
 } from "../../controllers/LABS/labBooking.controller.mjs";
 import {
+  allDataWithChild,
   bioGroupResult,
   getChildData,
   getDataToEdit,
@@ -26,6 +27,7 @@ import {
   MicroDataParentForw,
   microscopyData,
   microscopyParent,
+  UpdateChild,
   updateLabResult,
 } from "../../controllers/LABS/labResult.controller.mjs";
 
@@ -43,6 +45,8 @@ router.route("/labMicroData").post(microscopyData);
 router.route("/labMicroDataParent").post(microscopyParent);
 router.route("/labMicroData").get(MicroDataParentForw);
 router.route("/labMicroDataChild").get(getChildData);
+router.route("/labMicNameUpdate").put(UpdateChild);
+router.route("/allDataWithChild").get(allDataWithChild);
 
 // Lab Booking Related
 router.route("/labBooking").post(LabBookingCreator);

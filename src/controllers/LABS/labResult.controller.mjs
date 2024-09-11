@@ -483,7 +483,6 @@ const microscopyData = asyncHandler(async (req, res) => {
       throw new ApiError(`Some Data missed at line no. ${index + 1}`);
     return;
   });
-  console.log("childdata ", childData);
   let newData = [];
   const getbackData = await MicroscopyDataModel.find({ _id });
   console.log("get back data ", getbackData[0].childData);
@@ -518,6 +517,30 @@ const getChildData = asyncHandler(async (req, res) => {
     throw new ApiError(404, "DATA NOT FOUND!!!");
   return res.status(200).json(new ApiResponse(200, { data: response }));
 });
+// update MicroChild Param
+const UpdateChild = asyncHandler(async (req, res) => {
+  const { _id, name } = req?.body;
+  if (![_id, name].every(Boolean))
+    throw new ApiError(402, "ALL PARAMETERS ARE REQUIRED !!!");
+  const response = await MicroscopyDataModel.findOneAndUpdate(
+    { "childData._id": _id },
+    {
+      $set: {
+        "childData.$.name": name,
+        "childData.$.createdUser": req?.user?.userId,
+      },
+    },
+    { new: true }
+  );
+  return res.status(200).json(new ApiResponse(200, { data: response }));
+});
+
+const allDataWithChild = asyncHandler(async (req, res) => {
+  const response = await MicroscopyDataModel.find();
+  if (response.length <= 0) throw new ApiError(404, "NO DATA FOUND !!!");
+  return res.status(200).json(new ApiResponse(200, { data: response }));
+});
+
 export {
   labResult,
   bioGroupResult,
@@ -530,4 +553,6 @@ export {
   microscopyParent,
   MicroDataParentForw,
   getChildData,
+  UpdateChild,
+  allDataWithChild,
 };
